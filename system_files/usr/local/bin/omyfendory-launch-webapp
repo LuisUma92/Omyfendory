@@ -1,0 +1,6 @@
+#!/bin/bash
+# Launch URL as a webapp in Zen Browser (minimal UI profile)
+URL="$1"
+shift
+exec setsid uwsm app -- flatpak run app.zen_browser.zen \
+    --profile ~/.zen/Profiles/webapp --no-remote "$URL" "$@"

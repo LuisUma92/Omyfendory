@@ -1,0 +1,9 @@
+#!/bin/bash
+# Toggle hypridle (idle lock)
+if pidof hypridle > /dev/null; then
+    pkill hypridle
+    notify-send "Idle lock disabled"
+else
+    hypridle &
+    notify-send "Idle lock enabled"
+fi

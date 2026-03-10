@@ -1,0 +1,49 @@
+#!/bin/bash
+# Omyfendory Flatpak Manager
+# Installs Flatpak apps from /usr/share/omyfendory/flatpak/install
+# Runs as a oneshot systemd service after first boot.
+
+set -euo pipefail
+
+INSTALL_LIST="/usr/share/omyfendory/flatpak/install"
+STAMP_DIR="/var/lib/omyfendory"
+STAMP_FILE="${STAMP_DIR}/flatpak-manager.stamp"
+
+# Compute hash of current install list
+CURRENT_HASH=$(sha256sum "$INSTALL_LIST" | awk '{print $1}')
+
+# Skip if already ran with the same list
+if [[ -f "$STAMP_FILE" ]] && [[ "$(cat "$STAMP_FILE")" == "$CURRENT_HASH" ]]; then
+    echo "Flatpak list unchanged (${CURRENT_HASH:0:12}…), nothing to do."
+    exit 0
+fi
+
+# Ensure Flathub remote is present
+flatpak remote-add --if-not-exists --system flathub \
+    https://dl.flathub.org/repo/flathub.flatpakrepo
+
+# Read app IDs from install list (skip comments and blanks)
+mapfile -t APPS < <(grep -v '^\s*#' "$INSTALL_LIST" | grep -v '^\s*$')
+
+echo "Installing ${#APPS[@]} Flatpak apps..."
+
+FAILED=()
+for app in "${APPS[@]}"; do
+    echo "→ ${app}"
+    if ! flatpak install --system --noninteractive flathub "$app" 2>&1; then
+        echo "  ⚠ Failed: ${app}"
+        FAILED+=("$app")
+    fi
+done
+
+# Write stamp even if some apps failed — avoids re-running on every boot.
+# Failed apps will retry when the install list is updated (hash changes).
+mkdir -p "$STAMP_DIR"
+echo "$CURRENT_HASH" > "$STAMP_FILE"
+
+if [[ ${#FAILED[@]} -gt 0 ]]; then
+    echo "Completed with ${#FAILED[@]} failure(s): ${FAILED[*]}"
+    exit 1
+fi
+
+echo "All Flatpak apps installed successfully."

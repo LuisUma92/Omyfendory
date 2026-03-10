@@ -1,0 +1,13 @@
+#!/bin/bash
+# Focus an existing window by class, or launch it if not running.
+# Usage: omyfendory-launch-or-focus <class> <launch-command>
+CLASS="$1"
+shift
+CMD="$*"
+
+# Check if window with this class exists
+if hyprctl clients -j | jq -e ".[] | select(.class == \"$CLASS\")" > /dev/null 2>&1; then
+    hyprctl dispatch focuswindow "class:$CLASS"
+else
+    eval "$CMD"
+fi

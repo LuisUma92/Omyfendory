@@ -1,264 +1,205 @@
-# image-template
+# Omyfendory
 
-This repository is meant to be a template for building your own custom [bootc](https://github.com/bootc-dev/bootc) image. This template is the recommended way to make customizations to any image published by the Universal Blue Project.
+A custom [Fedora Atomic](https://fedoraproject.org/atomic-desktops/) desktop image built on [Bazzite](https://bazzite.gg/), featuring Hyprland as the window manager, a curated set of CLI tools, and the full Bazzite gaming stack. Delivered as a bootable OCI container via [Universal Blue](https://universal-blue.org/).
 
-# Community
+## What's Inside
 
-If you have questions about this template after following the instructions, try the following spaces:
-- [Universal Blue Forums](https://universal-blue.discourse.group/)
-- [Universal Blue Discord](https://discord.gg/WEu6BdFEtp)
-- [bootc discussion forums](https://github.com/bootc-dev/bootc/discussions) - This is not an Universal Blue managed space, but is an excellent resource if you run into issues with building bootc images.
+### Base: Bazzite GNOME
 
-# How to Use
+Inherits the complete Bazzite gaming stack — Steam, Lutris, Gamescope, MangoHud, patched Mesa/PipeWire/Bluez, AMD drivers, ROCm, and a custom kernel.
 
-To get started on your first bootc image, simply read and follow the steps in the next few headings.
-If you prefer instructions in video form, TesterTech created an excellent tutorial, embedded below.
+### Hyprland Desktop
 
-[![Video Tutorial](https://img.youtube.com/vi/IxBl11Zmq5w/0.jpg)](https://www.youtube.com/watch?v=IxBl11Zmq5wE)
+| Component | Role |
+|---|---|
+| [Hyprland](https://hyprland.org/) | Tiling Wayland compositor |
+| [uwsm](https://github.com/Vladimir-csp/uwsm) | Session manager (launched from GDM) |
+| [Waybar](https://github.com/Alexays/Waybar) | Top bar (workspaces, clock, battery, network, audio) |
+| [wofi](https://hg.sr.ht/~scoopta/wofi) | App launcher (`Super+Space`) |
+| [mako](https://github.com/emersion/mako) | Notifications (Nord theme, DnD mode) |
+| [foot](https://codeberg.org/dnkl/foot) | Terminal (Wayland-native, fast) |
+| [hypridle](https://github.com/hyprwm/hypridle) + [hyprlock](https://github.com/hyprwm/hyprlock) | Idle management and lock screen |
+| [hyprsunset](https://github.com/hyprwm/hyprsunset) | Night light |
+| [swaybg](https://github.com/swaywm/swaybg) | Wallpaper |
+| [swayosd](https://github.com/ErikReider/SwayOSD) | Volume/brightness OSD |
+| [grim](https://sr.ht/~emersion/grim/) + [slurp](https://github.com/emersion/slurp) + [satty](https://github.com/gabm/Satty) | Screenshot pipeline |
 
-## Step 0: Prerequisites
+### CLI Tools
 
-These steps assume you have the following:
-- A Github Account
-- A machine running a bootc image (e.g. Bazzite, Bluefin, Aurora, or Fedora Atomic)
-- Experience installing and using CLI programs
+neovim, tmux, zoxide, eza, fd-find, bat, du-dust, fzf, ripgrep, starship, lazygit, lazydocker, mise, imv, zathura
 
-## Step 1: Preparing the Template
+### Flatpak Apps (auto-installed on first boot)
 
-### Step 1a: Copying the Template
+Zen Browser, Microsoft Edge, Brave, Obsidian, LibreOffice, Zotero, Spotify, OBS Studio, Inkscape, GNOME Calculator, LocalSend
 
-Select `Use this Template` on this page. You can set the name and description of your repository to whatever you would like, but all other settings should be left untouched.
+### Development Container
 
-Once you have finished copying the template, you need to enable the Github Actions workflows for your new repository.
-To enable the workflows, go to the `Actions` tab of the new repository and click the button to enable workflows.
+An Arch Linux [distrobox](https://distrobox.it/) container (`arch-dev`) with compilers (clang, gcc, rust, cmake), languages (Node.js, Python, Ruby), and [yay](https://github.com/Jguer/yay) for AUR access.
 
-### Step 1b: Cloning the New Repository
+## Installation
 
-Here I will defer to the much superior GitHub documentation on the matter. You can use whichever method is easiest.
-[GitHub Documentation](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)
-
-Once you have the repository on your local drive, proceed to the next step.
-
-## Step 2: Initial Setup
-
-### Step 2a: Creating a Cosign Key
-
-Container signing is important for end-user security and is enabled on all Universal Blue images. By default the image builds *will fail* if you don't.
-
-First, install the [cosign CLI tool](https://edu.chainguard.dev/open-source/sigstore/cosign/how-to-install-cosign/#installing-cosign-with-the-cosign-binary)
-With the cosign tool installed, run inside your repo folder:
+### Switch an existing Fedora Atomic / Bazzite system
 
 ```bash
-COSIGN_PASSWORD="" cosign generate-key-pair
+sudo bootc switch ghcr.io/LuisUma92/omyfendory:latest
+systemctl reboot
 ```
 
-The signing key will be used in GitHub Actions and will not work if it is password protected.
+The system will reboot into Hyprland with GDM autologin. Flatpak apps install automatically on first boot (requires network).
 
-> [!WARNING]
-> Be careful to *never* accidentally commit `cosign.key` into your git repo. If this key goes out to the public, the security of your repository is compromised.
-
-Next, you need to add the key to GitHub. This makes use of GitHub's secret signing system.
-
-<details>
-    <summary>Using the Github Web Interface (preferred)</summary>
-
-Go to your repository settings, under `Secrets and Variables` -> `Actions`
-![image](https://user-images.githubusercontent.com/1264109/216735595-0ecf1b66-b9ee-439e-87d7-c8cc43c2110a.png)
-Add a new secret and name it `SIGNING_SECRET`, then paste the contents of `cosign.key` into the secret and save it. Make sure it's the .key file and not the .pub file. Once done, it should look like this:
-![image](https://user-images.githubusercontent.com/1264109/216735690-2d19271f-cee2-45ac-a039-23e6a4c16b34.png)
-</details>
-<details>
-<summary>Using the Github CLI</summary>
-
-If you have the `github-cli` installed, run:
+### Set up the dev container (optional, one-time)
 
 ```bash
-gh secret set SIGNING_SECRET < cosign.key
+omyfendory-setup-arch-dev
 ```
-</details>
 
-### Step 2b: Choosing Your Base Image
-
-To choose a base image, simply modify the line in the container file starting with `FROM`. This will be the image your image derives from, and is your starting point for modifications.
-For a base image, you can choose any of the Universal Blue images or start from a Fedora Atomic system. Below this paragraph is a dropdown with a non-exhaustive list of potential base images.
-
-<details>
-    <summary>Base Images</summary>
-
-- Bazzite: `ghcr.io/ublue-os/bazzite:stable`
-- Aurora: `ghcr.io/ublue-os/aurora:stable`
-- Bluefin: `ghcr.io/ublue-os/bluefin:stable`
-- Universal Blue Base: `ghcr.io/ublue-os/base-main:latest`
-- Fedora: `quay.io/fedora/fedora-bootc:42`
-
-You can find more Universal Blue images on the [packages page](https://github.com/orgs/ublue-os/packages).
-</details>
-
-If you don't know which image to pick, choosing the one your system is currently on is the best bet for a smooth transition. To find out what image your system currently uses, run the following command:
-```bash
-sudo bootc status
-```
-This will show you all the info you need to know about your current image. The image you are currently on is displayed after `Booted image:`. Paste that information after the `FROM` statement in the Containerfile to set it as your base image.
-
-### Step 2c: Changing Names
-
-Change the first line in the [Justfile](./Justfile) to your image's name.
-
-To commit and push all the files changed and added in step 2 into your Github repository:
-```bash
-git add Containerfile Justfile cosign.pub
-git commit -m "Initial Setup"
-git push
-```
-Once pushed, go look at the Actions tab on your Github repository's page.  The green checkmark should be showing on the top commit, which means your new image is ready!
-
-## Step 3: Switch to Your Image
-
-From your bootc system, run the following command substituting in your Github username and image name where noted.
-```bash
-sudo bootc switch ghcr.io/<username>/<image_name>
-```
-This should queue your image for the next reboot, which you can do immediately after the command finishes. You have officially set up your custom image! See the following section for an explanation of the important parts of the template for customization.
-
-# Repository Contents
-
-## Containerfile
-
-The [Containerfile](./Containerfile) defines the operations used to customize the selected image.This file is the entrypoint for your image build, and works exactly like a regular podman Containerfile. For reference, please see the [Podman Documentation](https://docs.podman.io/en/latest/Introduction.html).
-
-## build.sh
-
-The [build.sh](./build_files/build.sh) file is called from your Containerfile. It is the best place to install new packages or make any other customization to your system. There are customization examples contained within it for your perusal.
-
-## build.yml
-
-The [build.yml](./.github/workflows/build.yml) Github Actions workflow creates your custom OCI image and publishes it to the Github Container Registry (GHCR). By default, the image name will match the Github repository name. There are several environment variables at the start of the workflow which may be of interest to change.
-
-# Building Disk Images
-
-This template provides an out of the box workflow for creating disk images (ISO, qcow, raw) for your custom OCI image which can be used to directly install onto your machines.
-
-This template provides a way to upload the disk images that is generated from the workflow to a S3 bucket. The disk images will also be available as an artifact from the job, if you wish to use an alternate provider. To upload to S3 we use [rclone](https://rclone.org/) which is able to use [many S3 providers](https://rclone.org/s3/).
-
-## Setting Up ISO Builds
-
-The [build-disk.yml](./.github/workflows/build-disk.yml) Github Actions workflow creates a disk image from your OCI image by utilizing the [bootc-image-builder](https://osbuild.org/docs/bootc/). In order to use this workflow you must complete the following steps:
-
-1. Modify `disk_config/iso.toml` to point to your custom container image before generating an ISO image.
-2. If you changed your image name from the default in `build.yml` then in the `build-disk.yml` file edit the `IMAGE_REGISTRY`, `IMAGE_NAME` and `DEFAULT_TAG` environment variables with the correct values. If you did not make changes, skip this step.
-3. Finally, if you want to upload your disk images to S3 then you will need to add your S3 configuration to the repository's Action secrets. This can be found by going to your repository settings, under `Secrets and Variables` -> `Actions`. You will need to add the following
-  - `S3_PROVIDER` - Must match one of the values from the [supported list](https://rclone.org/s3/)
-  - `S3_BUCKET_NAME` - Your unique bucket name
-  - `S3_ACCESS_KEY_ID` - It is recommended that you make a separate key just for this workflow
-  - `S3_SECRET_ACCESS_KEY` - See above.
-  - `S3_REGION` - The region your bucket lives in. If you do not know then set this value to `auto`.
-  - `S3_ENDPOINT` - This value will be specific to the bucket as well.
-
-Once the workflow is done, you'll find the disk images either in your S3 bucket or as part of the summary under `Artifacts` after the workflow is completed.
-
-# Artifacthub
-
-This template comes with the necessary tooling to index your image on [artifacthub.io](https://artifacthub.io). Use the `artifacthub-repo.yml` file at the root to verify yourself as the publisher. This is important to you for a few reasons:
-
-- The value of artifacthub is it's one place for people to index their custom images, and since we depend on each other to learn, it helps grow the community. 
-- You get to see your pet project listed with the other cool projects in Cloud Native.
-- Since the site puts your README front and center, it's a good way to learn how to write a good README, learn some marketing, finding your audience, etc. 
-
-[Discussion Thread](https://universal-blue.discourse.group/t/listing-your-custom-image-on-artifacthub/6446)
-
-# Justfile Documentation
-
-The `Justfile` contains various commands and configurations for building and managing container images and virtual machine images using Podman and other utilities.
-To use it, you must have installed [just](https://just.systems/man/en/introduction.html) from your package manager or manually. It is available by default on all Universal Blue images.
-
-## Environment Variables
-
-- `image_name`: The name of the image (default: "image-template").
-- `default_tag`: The default tag for the image (default: "latest").
-- `bib_image`: The Bootc Image Builder (BIB) image (default: "quay.io/centos-bootc/bootc-image-builder:latest").
-
-## Building The Image
-
-### `just build`
-
-Builds a container image using Podman.
+This creates the `arch-dev` distrobox. Enter it with:
 
 ```bash
-just build $target_image $tag
+distrobox enter arch-dev
 ```
 
-Arguments:
-- `$target_image`: The tag you want to apply to the image (default: `$image_name`).
-- `$tag`: The tag for the image (default: `$default_tag`).
+## Keyboard Shortcuts
 
-## Building and Running Virtual Machines and ISOs
+### Window Management
 
-The below commands all build QCOW2 images. To produce or use a different type of image, substitute in the command with that type in the place of `qcow2`. The available types are `qcow2`, `iso`, and `raw`.
+| Shortcut | Action |
+|---|---|
+| `Super+Q` | Close window |
+| `Super+J` | Toggle split |
+| `Super+Shift+V` | Toggle floating |
+| `Shift+F11` | Fullscreen |
+| `Super+Arrow` | Move focus |
+| `Super+Shift+Arrow` | Swap window |
+| `Super+1-0` | Switch workspace |
+| `Super+Shift+1-0` | Move window to workspace |
+| `Super+Tab / Shift+Tab` | Next / previous workspace |
+| `Alt+Tab` | Cycle windows |
+| `Super+- / +` | Resize width |
+| `Super+Mouse drag` | Move / resize window |
 
-### `just build-qcow2`
+### Apps
 
-Builds a QCOW2 virtual machine image.
+| Shortcut | Action |
+|---|---|
+| `Super+Return` | Terminal (foot) |
+| `Super+Space` | App launcher (wofi) |
+| `Super+B` | Browser (Zen) |
+| `Super+F` | File manager (Nautilus) |
+| `Super+N` | Neovim |
+| `Super+M` | Spotify |
+| `Super+O` | Obsidian |
+| `Super+E` | Edge |
+| `Super+I` | Inkscape |
+| `Super+Z` | Zotero |
+| `Super+D` | PDF viewer (zathura) |
+| `Super+A` | ChatGPT |
+| `Super+Y` | YouTube |
+| `Super+W` | WhatsApp |
+
+### System
+
+| Shortcut | Action |
+|---|---|
+| `Super+Ctrl+L` | Lock screen |
+| `Super+Ctrl+N` | Toggle night light |
+| `Super+Ctrl+I` | Toggle idle lock |
+| `Super+Shift+Space` | Toggle waybar |
+| `Super+Comma` | Dismiss notification |
+| `Super+Backspace` | Toggle window transparency |
+| `Print` | Screenshot region |
+| `Super+Print` | Color picker |
+| `XF86PowerOff` | Power menu |
+| `Super+Escape` | Logout |
+
+### Media
+
+Volume, brightness, and media keys work natively. Hold `Alt` for fine adjustments (+1 increments).
+
+## Building Locally
+
+Requires [Podman](https://podman.io/) and [Just](https://just.systems/).
 
 ```bash
-just build-qcow2 $target_image $tag
+# Build the OCI image
+just build
+
+# Build a QCOW2 VM image for testing
+just build-qcow2
+
+# Run the VM
+just run-vm-qcow2
+
+# Lint shell scripts
+just lint
 ```
 
-### `just rebuild-qcow2`
+## Repository Structure
 
-Rebuilds a QCOW2 virtual machine image.
-
-```bash
-just rebuild-vm $target_image $tag
+```
+Containerfile                       # OCI image definition
+build_files/
+  build.sh                          # Package installs, COPR setup, service enablement
+system_files/                       # Overlay copied to / in the image
+  etc/
+    distrobox/arch-dev.ini           # Arch dev container definition
+    skel/.config/
+      hypr/                          # Hyprland config (modular)
+      waybar/                        # Bar config + styling
+      mako/config                    # Notification daemon
+      foot/foot.ini                  # Terminal
+      starship.toml                  # Shell prompt
+      uwsm/env                      # Session environment
+  usr/
+    lib/systemd/system/
+      omyfendory-flatpak-manager.service
+    libexec/
+      omyfendory-flatpak-manager     # First-boot Flatpak installer
+    local/bin/
+      omyfendory-launch-browser      # Zen Browser launcher
+      omyfendory-launch-webapp       # Webapp mode launcher
+      omyfendory-launch-or-focus     # Focus-or-launch helper
+      omyfendory-power-menu          # Lock/suspend/reboot/shutdown
+      omyfendory-screenshot          # Region screenshot pipeline
+      omyfendory-toggle-nightlight   # Hyprsunset toggle
+      omyfendory-toggle-idle         # Hypridle toggle
+      omyfendory-setup-arch-dev      # Distrobox setup script
+    share/omyfendory/flatpak/
+      install                        # Flatpak app list
+.github/workflows/
+  build.yml                          # CI: build, push to GHCR, sign with cosign
+Justfile                             # Local dev commands
 ```
 
-### `just run-vm-qcow2`
+## Customization
 
-Runs a virtual machine from a QCOW2 image.
+### Change Flatpak apps
 
-```bash
-just run-vm-qcow2 $target_image $tag
-```
+Edit `system_files/usr/share/omyfendory/flatpak/install` — one Flatpak app ID per line. The manager re-runs automatically when the list changes.
 
-### `just spawn-vm`
+### Change Hyprland keybindings
 
-Runs a virtual machine using systemd-vmspawn.
+Edit the files under `system_files/etc/skel/.config/hypr/bindings/`:
+- `apps.conf` — app launch shortcuts
+- `tiling.conf` — window/workspace management
+- `media.conf` — volume, brightness, media keys
+- `utilities.conf` — system utilities, screenshots, notifications
 
-```bash
-just spawn-vm rebuild="0" type="qcow2" ram="6G"
-```
+### Add host packages
 
-## File Management
+Add `dnf5 -y install <package>` to `build_files/build.sh`.
 
-### `just check`
+### Add dev tools
 
-Checks the syntax of all `.just` files and the `Justfile`.
+Edit the `additional_packages` line in `system_files/etc/distrobox/arch-dev.ini`.
 
-### `just fix`
+## How It Works
 
-Fixes the syntax of all `.just` files and the `Justfile`.
+1. **Build time** (`Containerfile` + `build.sh`): installs RPM packages from Fedora repos and COPRs, configures GDM autologin, enables services, pre-configures Flathub remote.
+2. **Image delivery**: CI builds the OCI image daily, pushes to GHCR, signs with cosign.
+3. **First boot**: `omyfendory-flatpak-manager.service` installs all Flatpak apps. A sha256 stamp file ensures it only re-runs when the app list changes.
+4. **Updates**: `bootc upgrade` pulls the latest image atomically. Rollback with `bootc rollback`.
 
-### `just clean`
+## Credits
 
-Cleans the repository by removing build artifacts.
-
-### `just lint`
-
-Runs shell check on all Bash scripts.
-
-### `just format`
-
-Runs shfmt on all Bash scripts.
-
-## Additional resources
-
-For additional driver support, ublue maintains a set of scripts and container images available at [ublue-akmod](https://github.com/ublue-os/akmods). These images include the necessary scripts to install multiple kernel drivers within the container (Nvidia, OpenRazer, Framework...). The documentation provides guidance on how to properly integrate these drivers into your container image.
-
-## Community Examples
-
-These are images derived from this template (or similar enough to this template). Reference them when building your image!
-
-- [m2Giles' OS](https://github.com/m2giles/m2os)
-- [bOS](https://github.com/bsherman/bos)
-- [Homer](https://github.com/bketelsen/homer/)
-- [Amy OS](https://github.com/astrovm/amyos)
-- [VeneOS](https://github.com/Venefilyn/veneos)
+Built on top of [Universal Blue](https://universal-blue.org/) and [Bazzite](https://bazzite.gg/). Started from the [ublue-os/image-template](https://github.com/ublue-os/image-template).

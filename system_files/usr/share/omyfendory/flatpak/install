@@ -1,0 +1,23 @@
+# Omyfendory — Flatpak apps to install on first boot
+# One app ID per line. Comments and blank lines are ignored.
+
+# Browsers
+app.zen_browser.zen
+com.microsoft.Edge
+com.brave.Browser
+
+# Productivity
+md.obsidian.Obsidian
+org.libreoffice.LibreOffice
+org.zotero.Zotero
+
+# Media
+com.spotify.Client
+com.obsproject.Studio
+
+# Creative
+org.inkscape.Inkscape
+
+# Utilities
+org.gnome.Calculator
+org.localsend.localsend_app

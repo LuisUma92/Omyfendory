@@ -1,0 +1,11 @@
+#!/bin/bash
+# Focus an existing webapp window by title, or launch it.
+# Usage: omyfendory-launch-or-focus-webapp <name> <url>
+NAME="$1"
+URL="$2"
+
+if hyprctl clients -j | jq -e ".[] | select(.title | contains(\"$NAME\"))" > /dev/null 2>&1; then
+    hyprctl dispatch focuswindow "title:$NAME"
+else
+    omyfendory-launch-webapp "$URL"
+fi
