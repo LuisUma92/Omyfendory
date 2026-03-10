@@ -1,0 +1,6 @@
+# Set default terminal and editor
+export TERMINAL=foot
+export EDITOR=nvim
+
+# Activate mise if present
+command -v mise &>/dev/null && eval "$(mise activate bash)"

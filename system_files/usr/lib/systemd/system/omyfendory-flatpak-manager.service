@@ -1,0 +1,13 @@
+[Unit]
+Description=Omyfendory Flatpak Manager — install default Flatpak apps
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=/usr/share/omyfendory/flatpak/install
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/omyfendory-flatpak-manager
+TimeoutStartSec=15min
+
+[Install]
+WantedBy=multi-user.target

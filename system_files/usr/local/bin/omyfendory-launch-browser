@@ -1,0 +1,3 @@
+#!/bin/bash
+# Launch default browser (Zen via flatpak)
+exec setsid uwsm app -- flatpak run app.zen_browser.zen "$@"

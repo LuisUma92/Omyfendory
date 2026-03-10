@@ -1,0 +1,10 @@
+#!/bin/bash
+# Simple power menu via wofi
+CHOICE=$(printf "Lock\nSuspend\nReboot\nShutdown\nLogout" | wofi --dmenu --prompt "Power")
+case "$CHOICE" in
+    Lock)     loginctl lock-session ;;
+    Suspend)  systemctl suspend ;;
+    Reboot)   systemctl reboot ;;
+    Shutdown) systemctl poweroff ;;
+    Logout)   hyprctl dispatch exit ;;
+esac

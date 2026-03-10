@@ -1,0 +1,8 @@
+#!/bin/bash
+# Screenshot: select region, copy to clipboard, open in satty for annotation
+TMPFILE=$(mktemp /tmp/screenshot-XXXXXX.png)
+grim -g "$(slurp)" "$TMPFILE" && {
+    wl-copy < "$TMPFILE"
+    satty --filename "$TMPFILE" --copy-command wl-copy
+}
+rm -f "$TMPFILE"

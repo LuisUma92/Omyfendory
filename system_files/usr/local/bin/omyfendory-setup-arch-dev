@@ -1,0 +1,14 @@
+#!/bin/bash
+set -euo pipefail
+
+# Create the arch-dev distrobox container from /etc/distrobox/arch-dev.ini
+# Run this once after first boot.
+
+echo "Creating arch-dev distrobox container..."
+distrobox assemble create --file /etc/distrobox/arch-dev.ini
+
+echo ""
+echo "Container created. Enter with: distrobox enter arch-dev"
+echo ""
+echo "Optional: install spack (HPC package manager):"
+echo "  distrobox enter arch-dev -- git clone -c feature.manyFiles=true https://github.com/spack/spack.git ~/.spack"
