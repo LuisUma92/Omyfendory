@@ -94,6 +94,7 @@ dnf5 -y install \
 # eza (removed from Fedora repos — install from GitHub release)
 EZA_VERSION=$(curl -s https://api.github.com/repos/eza-community/eza/releases/latest | grep -Po '"tag_name": "v\K[^"]*')
 curl -sL -o /tmp/eza.tar.gz "https://github.com/eza-community/eza/releases/download/v${EZA_VERSION}/eza_x86_64-unknown-linux-gnu.tar.gz"
+mkdir -p /usr/local/bin
 tar xzf /tmp/eza.tar.gz -C /usr/local/bin
 chmod +x /usr/local/bin/eza
 rm -f /tmp/eza.tar.gz
