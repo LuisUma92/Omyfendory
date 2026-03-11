@@ -43,7 +43,7 @@ Lenovo IdeaPad Slim 5 15ARP10, Ryzen 7 7735HS, Radeon 680M. Uses amd-pstate-epp 
 ### Packages added to host image via build.sh (done)
 
 **Hyprland ecosystem:**
-hyprland, hypridle, hyprlock, hyprpicker, hyprsunset, hyprland-preview-share-picker, hyprland-guiutils, xdg-desktop-portal-hyprland, uwsm, waybar, mako, swaybg, swayosd, slurp, satty, wl-clipboard, wl-clip-persist, wayfreeze, polkit-gnome, brightnessctl, playerctl, pamixer, wofi, grim
+hyprland, hypridle, hyprlock, hyprpicker, hyprsunset, hyprland-qtutils, hyprpolkitagent, xdg-desktop-portal-hyprland, uwsm, waybar, mako, swaybg, swayosd, slurp, satty, wl-clipboard, cliphist, brightnessctl, playerctl, pamixer, wofi, grim
 
 **Terminal + fonts:**
 foot. Nerd fonts from bazzite base. fontawesome-fonts-all, ia-writer fonts.
@@ -52,7 +52,7 @@ foot. Nerd fonts from bazzite base. fontawesome-fonts-all, ia-writer fonts.
 neovim, tmux, zoxide, eza, fd-find, bat, du-dust, fzf, ripgrep, starship, lazygit, lazydocker, mise, imv, zathura
 
 **COPRs used (disabled after install):**
-solopasha/hyprland, atim/lazygit, atim/lazydocker, mise official repo
+solopasha/hyprland, erikreider/SwayOSD, atim/lazygit, atim/lazydocker, mise official repo
 
 ### Dotfiles overlay (done — step 8)
 
