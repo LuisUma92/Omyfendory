@@ -10,14 +10,19 @@ set -ouex pipefail
 
 dnf5 -y install dnf5-plugins || true
 
-# Hyprland ecosystem (uwsm, hyprsunset, swayosd, satty, etc.)
+# Hyprland ecosystem (uwsm, hyprsunset, satty, etc.)
 dnf5 -y copr enable solopasha/hyprland
+# SwayOSD (volume/brightness OSD)
+dnf5 -y copr enable erikreider/SwayOSD
 # lazygit + lazydocker
 dnf5 -y copr enable atim/lazygit
 dnf5 -y copr enable atim/lazydocker
 
 # mise (dev tool version manager) — official repo
 dnf5 -y config-manager addrepo --from-repofile=https://mise.jdx.dev/rpm/mise.repo
+
+# Fix COPR repo_gpgcheck issue with dnf5 in container builds
+sed -i 's/repo_gpgcheck=1/repo_gpgcheck=0/' /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:*.repo
 
 # ─── Hyprland ecosystem ───────────────────────────────────────
 
@@ -27,8 +32,8 @@ dnf5 -y install \
     hyprlock \
     hyprpicker \
     hyprsunset \
-    hyprland-preview-share-picker \
-    hyprland-guiutils \
+    hyprland-qtutils \
+    hyprpolkitagent \
     xdg-desktop-portal-hyprland \
     uwsm \
     waybar \
@@ -38,9 +43,7 @@ dnf5 -y install \
     slurp \
     satty \
     wl-clipboard \
-    wl-clip-persist \
-    wayfreeze \
-    polkit-gnome \
+    cliphist \
     brightnessctl \
     playerctl \
     pamixer \
@@ -85,6 +88,7 @@ dnf5 -y install \
 # Prevent COPRs from persisting on the final image
 
 dnf5 -y copr disable solopasha/hyprland
+dnf5 -y copr disable erikreider/SwayOSD
 dnf5 -y copr disable atim/lazygit
 dnf5 -y copr disable atim/lazydocker
 dnf5 -y config-manager setopt mise.enabled=0
