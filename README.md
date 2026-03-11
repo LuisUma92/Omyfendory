@@ -41,7 +41,8 @@ An Arch Linux [distrobox](https://distrobox.it/) container (`arch-dev`) with com
 ### Switch an existing Fedora Atomic / Bazzite system
 
 ```bash
-sudo bootc switch ghcr.io/LuisUma92/omyfendory:latest
+cosign verify --key cosign.pub ghcr.io/luisuma92/omyfendory:latest  # optional: verify signature
+sudo bootc switch ghcr.io/luisuma92/omyfendory:latest
 systemctl reboot
 ```
 
@@ -150,20 +151,24 @@ system_files/                       # Overlay copied to / in the image
       foot/foot.ini                  # Terminal
       starship.toml                  # Shell prompt
       uwsm/env                      # Session environment
+    skel/.zen/Profiles/webapp/         # Zen Browser webapp profile
+      chrome/userChrome.css            # Hides browser chrome for webapp mode
+      user.js                          # Webapp-friendly defaults
   usr/
-    lib/systemd/system/
-      omyfendory-flatpak-manager.service
-    libexec/
-      omyfendory-flatpak-manager     # First-boot Flatpak installer
-    local/bin/
+    bin/
       omyfendory-launch-browser      # Zen Browser launcher
-      omyfendory-launch-webapp       # Webapp mode launcher
+      omyfendory-launch-webapp       # Webapp mode launcher (minimal UI profile)
       omyfendory-launch-or-focus     # Focus-or-launch helper
+      omyfendory-launch-or-focus-webapp # Focus-or-launch for webapps
       omyfendory-power-menu          # Lock/suspend/reboot/shutdown
       omyfendory-screenshot          # Region screenshot pipeline
       omyfendory-toggle-nightlight   # Hyprsunset toggle
       omyfendory-toggle-idle         # Hypridle toggle
       omyfendory-setup-arch-dev      # Distrobox setup script
+    lib/systemd/system/
+      omyfendory-flatpak-manager.service
+    libexec/
+      omyfendory-flatpak-manager     # First-boot Flatpak installer
     share/omyfendory/flatpak/
       install                        # Flatpak app list
 .github/workflows/
@@ -195,10 +200,18 @@ Edit the `additional_packages` line in `system_files/etc/distrobox/arch-dev.ini`
 
 ## How It Works
 
-1. **Build time** (`Containerfile` + `build.sh`): installs RPM packages from Fedora repos and COPRs, configures GDM autologin, enables services, pre-configures Flathub remote.
-2. **Image delivery**: CI builds the OCI image daily, pushes to GHCR, signs with cosign.
-3. **First boot**: `omyfendory-flatpak-manager.service` installs all Flatpak apps. A sha256 stamp file ensures it only re-runs when the app list changes.
+1. **Build time** (`Containerfile` + `build.sh`): installs RPM packages from Fedora repos and COPRs, downloads eza and iA Writer fonts from GitHub, configures GDM autologin, enables services, pre-configures Flathub remote.
+2. **Image delivery**: CI builds the OCI image daily, pushes to GHCR, signs with [cosign](https://github.com/sigstore/cosign).
+3. **First boot**: `omyfendory-flatpak-manager.service` installs all Flatpak apps. A sha256 stamp file ensures it only re-runs when the app list changes. Webapp shortcuts open Zen Browser with a dedicated profile that hides all browser chrome.
 4. **Updates**: `bootc upgrade` pulls the latest image atomically. Rollback with `bootc rollback`.
+
+## Verification
+
+Images are signed with cosign. Verify before installing:
+
+```bash
+cosign verify --key cosign.pub ghcr.io/luisuma92/omyfendory:latest
+```
 
 ## Credits
 
