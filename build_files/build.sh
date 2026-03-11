@@ -58,11 +58,17 @@ dnf5 -y install foot
 # Nerd fonts (CaskaydiaMono, JetBrainsMono) already in bazzite base
 # via che/nerd-fonts COPR (nerd-fonts package)
 
-dnf5 -y install \
-    fontawesome-fonts-all \
-    ia-writer-duo-fonts \
-    ia-writer-mono-fonts \
-    ia-writer-quattro-fonts
+dnf5 -y install fontawesome-fonts-all
+
+# iA Writer fonts (not packaged for Fedora — install from GitHub)
+curl -sL -o /tmp/ia-fonts.tar.gz https://github.com/iaolo/iA-Fonts/archive/refs/heads/master.tar.gz
+mkdir -p /usr/share/fonts/iA-Writer
+tar xzf /tmp/ia-fonts.tar.gz -C /tmp
+cp /tmp/iA-Fonts-master/iA\ Writer\ Mono/Static/*.ttf /usr/share/fonts/iA-Writer/
+cp /tmp/iA-Fonts-master/iA\ Writer\ Duo/Static/*.ttf /usr/share/fonts/iA-Writer/
+cp /tmp/iA-Fonts-master/iA\ Writer\ Quattro/Static/*.ttf /usr/share/fonts/iA-Writer/
+fc-cache -fv
+rm -rf /tmp/ia-fonts.tar.gz /tmp/iA-Fonts-master
 
 # ─── CLI tools ─────────────────────────────────────────────────
 
