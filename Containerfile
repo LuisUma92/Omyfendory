@@ -17,8 +17,9 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
 ## Copy system overlay (skel configs, helper scripts)
 COPY system_files /
 
-## Make scripts executable
-RUN chmod +x /usr/local/bin/omyfendory-* /usr/libexec/omyfendory-*
+## Make scripts executable and enable services that depend on copied files
+RUN chmod +x /usr/bin/omyfendory-* /usr/libexec/omyfendory-* && \
+    systemctl enable omyfendory-flatpak-manager.service
 
 ### LINTING
 ## Verify final image and contents are correct.

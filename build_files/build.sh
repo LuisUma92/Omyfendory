@@ -118,7 +118,6 @@ curl --retry 3 -Lo /etc/flatpak/remotes.d/flathub.flatpakrepo \
 # ─── Services ──────────────────────────────────────────────────
 
 systemctl enable podman.socket
-systemctl enable omyfendory-flatpak-manager.service
 
 # ─── GDM autologin with Hyprland ──────────────────────────────
 
