@@ -14,6 +14,8 @@ dnf5 -y install dnf5-plugins || true
 dnf5 -y copr enable solopasha/hyprland
 # SwayOSD (volume/brightness OSD)
 dnf5 -y copr enable erikreider/swayosd
+# starship prompt
+dnf5 -y copr enable atim/starship
 # lazygit + lazydocker
 dnf5 -y copr enable atim/lazygit
 dnf5 -y copr enable atim/lazydocker
@@ -76,7 +78,6 @@ dnf5 -y install \
     neovim \
     tmux \
     zoxide \
-    eza \
     fd-find \
     bat \
     du-dust \
@@ -90,11 +91,19 @@ dnf5 -y install \
     zathura \
     zathura-pdf-mupdf
 
+# eza (removed from Fedora repos — install from GitHub release)
+EZA_VERSION=$(curl -s https://api.github.com/repos/eza-community/eza/releases/latest | grep -Po '"tag_name": "v\K[^"]*')
+curl -sL -o /tmp/eza.tar.gz "https://github.com/eza-community/eza/releases/download/v${EZA_VERSION}/eza_x86_64-unknown-linux-gnu.tar.gz"
+tar xzf /tmp/eza.tar.gz -C /usr/local/bin
+chmod +x /usr/local/bin/eza
+rm -f /tmp/eza.tar.gz
+
 # ─── Disable COPRs ────────────────────────────────────────────
 # Prevent COPRs from persisting on the final image
 
 dnf5 -y copr disable solopasha/hyprland
 dnf5 -y copr disable erikreider/swayosd
+dnf5 -y copr disable atim/starship
 dnf5 -y copr disable atim/lazygit
 dnf5 -y copr disable atim/lazydocker
 dnf5 -y config-manager setopt mise.enabled=0
