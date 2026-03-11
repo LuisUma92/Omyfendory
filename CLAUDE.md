@@ -52,7 +52,7 @@ foot. Nerd fonts from bazzite base. fontawesome-fonts-all, ia-writer fonts.
 neovim, tmux, zoxide, eza, fd-find, bat, du-dust, fzf, ripgrep, starship, lazygit, lazydocker, mise, imv, zathura
 
 **COPRs used (disabled after install):**
-solopasha/hyprland, erikreider/SwayOSD, atim/lazygit, atim/lazydocker, mise official repo
+solopasha/hyprland, erikreider/swayosd, atim/lazygit, atim/lazydocker, mise official repo
 
 ### Dotfiles overlay (done — step 8)
 
