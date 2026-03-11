@@ -106,7 +106,7 @@ dnf5 -y copr disable erikreider/swayosd
 dnf5 -y copr disable atim/starship
 dnf5 -y copr disable atim/lazygit
 dnf5 -y copr disable atim/lazydocker
-dnf5 -y config-manager setopt mise.enabled=0
+rm -f /etc/yum.repos.d/mise.repo
 
 # ─── Flatpak remote ──────────────────────────────────────────
 # Pre-configure Flathub so the flatpak-manager service can install apps
