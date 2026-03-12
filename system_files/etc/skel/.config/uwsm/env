@@ -2,5 +2,8 @@
 export TERMINAL=foot
 export EDITOR=nvim
 
+# Include Flatpak exports so app icons and .desktop files are visible
+export XDG_DATA_DIRS="/usr/local/share:/usr/share:/var/lib/flatpak/exports/share:${XDG_DATA_DIRS:-}"
+
 # Activate mise if present
 command -v mise &>/dev/null && eval "$(mise activate bash)"

@@ -30,10 +30,15 @@ echo "Installing ${#APPS[@]} Flatpak apps..."
 FAILED=()
 for app in "${APPS[@]}"; do
     echo "→ ${app}"
-    if ! flatpak install --system --noninteractive flathub "$app" 2>&1; then
-        echo "  ⚠ Failed: ${app}"
-        FAILED+=("$app")
+    OUTPUT=$(flatpak install --system --noninteractive flathub "$app" 2>&1) && continue
+    # "already installed" from another remote is not a real failure
+    if echo "$OUTPUT" | grep -q "already installed"; then
+        echo "  ✓ ${app} (already installed)"
+        continue
     fi
+    echo "$OUTPUT"
+    echo "  ⚠ Failed: ${app}"
+    FAILED+=("$app")
 done
 
 # Write stamp even if some apps failed — avoids re-running on every boot.
