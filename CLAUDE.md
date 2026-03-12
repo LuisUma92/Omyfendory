@@ -9,13 +9,13 @@ Build a custom Fedora Atomic (Universal Blue) image that reproduces the current 
 ## Key References
 
 - [ublue-os/image-template](https://github.com/ublue-os/image-template) — base template (already cloned)
-- [ublue-os/main](https://github.com/ublue-os/main/) — base image (silverblue-main:stable)
+- [ublue-os/main](https://github.com/ublue-os/main/) — base image (silverblue-main:latest)
 - [Current dotfiles](https://github.com/LuisUma92/dotfiles.git) — saved state to reproduce
 - [Omarchy install scripts](~/.local/share/omarchy/) — reference for package lists and config structure
 
 ## Build System
 
-- `Containerfile` — OCI image definition, `FROM ghcr.io/ublue-os/silverblue-main:stable`
+- `Containerfile` — OCI image definition, `FROM ghcr.io/ublue-os/silverblue-main:latest`
 - `build_files/build.sh` — main customization script called from Containerfile
 - `system_files/` — overlay copied directly to `/` in the image (skel configs, helper scripts)
 - `.github/workflows/build.yml` — CI pipeline to build and push to GHCR
@@ -24,7 +24,7 @@ Build a custom Fedora Atomic (Universal Blue) image that reproduces the current 
 
 ## Decisions Made
 
-### Base image: silverblue-main:stable (done)
+### Base image: silverblue-main:latest (done)
 Switched from bazzite-gnome to vanilla Silverblue via Universal Blue — no gaming stack needed. GNOME variant chosen over KDE because Hyprland ecosystem is GTK-based. Nautilus, nm-applet, gnome-keyring, polkit-gnome, evince, gnome-calculator come included.
 
 ### Display manager: GDM with autologin (done)
@@ -115,7 +115,7 @@ Defined in `system_files/etc/distrobox/arch-dev.ini`. Uses `archlinux:latest` im
 1. ~~Clone image-template repo~~ — done
 2. ~~Audit current system~~ — done (230 Arch packages analyzed)
 3. ~~Study omarchy scripting approach~~ — done (reviewed install scripts and package lists)
-4. ~~Evaluate base image~~ — done (silverblue-main:stable, switched from bazzite-gnome)
+4. ~~Evaluate base image~~ — done (silverblue-main:latest, switched from bazzite-gnome)
 5. ~~Decide flatpak vs distrobox vs host~~ — done (see above)
 6. ~~Implement build.sh~~ — done (Hyprland stack, CLI tools, nerd-fonts, GDM config)
 8. ~~Configure Hyprland dotfiles overlay~~ — done (21 configs + 8 scripts, standalone, Nord theme)

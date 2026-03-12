@@ -3,7 +3,7 @@ set -ouex pipefail
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # Omyfendory build script
-# Layers Hyprland + tools on top of silverblue-main:stable
+# Layers Hyprland + tools on top of silverblue-main:latest
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 # ─── Enable COPRs ──────────────────────────────────────────────

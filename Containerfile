@@ -3,7 +3,7 @@ FROM scratch AS ctx
 COPY build_files /
 
 # Base Image
-FROM ghcr.io/ublue-os/silverblue-main:stable
+FROM ghcr.io/ublue-os/silverblue-main:latest
 
 ### MODIFICATIONS
 ## Install packages and configure services via build.sh
