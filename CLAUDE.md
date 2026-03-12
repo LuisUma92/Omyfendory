@@ -93,6 +93,9 @@ Using `zen-browser --blank-window --no-remote` via `omyfendory-launch-webapp` sc
 
 **Webapp bindings** (in `bindings/apps.conf`): ChatGPT, YouTube, WhatsApp, Google Messages, CorreoUCR, Gmail, Gitea, GitHub.
 
+### Firma Digital — Costa Rican digital signature (done)
+Pre-installed in the image for government and banking use. RPMs and PKCS#11 libraries ship in `system_files/opt/FirmaDigital/` and are installed at build time via `--nodeps` (RHEL 9 RPMs on Fedora 43 — compatible libs, different dep names). Agente GAUDI's SCManager is patched with `patchelf` to link against `libwebkit2gtk-4.1` (Fedora ships 4.1, RPM expects 4.0). Idopte's `libidop11.so` is registered system-wide via p11-kit (`/usr/share/p11-kit/modules/firma-digital.module`). Legacy Athena libs (`libASEP11.so`, `libaseLaserP11.so`) are copied to `/usr/lib64/` with symlinks at `/usr/lib/x64-athena/` and `/usr/lib/` for compatibility. `pcscd.socket` is enabled for on-demand smart card reader access. The `/opt/FirmaDigital/` directory is removed after install to save image space. CA certificates must be installed post-deployment by the user (`update-ca-trust`).
+
 ### Excluded apps
 Signal, Typora, Pinta, Kdenlive, XournalPP, Grok, Basecamp, X — not needed
 

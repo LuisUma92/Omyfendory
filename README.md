@@ -36,6 +36,16 @@ Zen Browser, Microsoft Edge, Brave, Obsidian, LibreOffice, Zotero, Spotify, OBS 
 
 An Arch Linux [distrobox](https://distrobox.it/) container (`arch-dev`) with compilers (clang, gcc, rust, cmake), languages (Node.js, Python, Ruby), and [yay](https://github.com/Jguer/yay) for AUR access.
 
+### Firma Digital (Costa Rica)
+
+Pre-installed digital signature stack for Costa Rican government and banking services:
+- **Idopte middleware** — PKCS#11 smart card driver (`libidop11.so`)
+- **Agente GAUDI** — authentication broker for BCCR/banking portals
+- **Legacy Athena libraries** — `libASEP11.so` for older government applets
+- **pcscd** — smart card reader daemon (auto-starts on card insertion)
+
+The PKCS#11 module is registered system-wide via p11-kit — browsers detect the smart card automatically.
+
 ## Installation
 
 ### Switch an existing Fedora Atomic / Bazzite system
@@ -59,6 +69,27 @@ This creates the `arch-dev` distrobox. Enter it with:
 ```bash
 distrobox enter arch-dev
 ```
+
+### Set up Firma Digital credentials (required for digital signature)
+
+1. Copy the CA certificate chain (`.cer` or `.crt` files from BCCR/SINPE) to the system trust store:
+
+   ```bash
+   sudo cp /path/to/your/ca-certificates/*.cer /usr/share/pki/ca-trust-source/anchors/
+   sudo update-ca-trust
+   ```
+
+2. Plug in your USB smart card reader and insert your Firma Digital card.
+
+3. Verify the card is detected:
+
+   ```bash
+   pcsc_scan
+   ```
+
+   You should see your card reader and card ATR listed.
+
+4. The PKCS#11 module is pre-configured via p11-kit. Zen Browser (and any NSS-based app) will detect the smart card automatically under Security Devices. No manual module loading needed.
 
 ## Keyboard Shortcuts
 
