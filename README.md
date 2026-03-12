@@ -1,12 +1,12 @@
 # Omyfendory
 
-A custom [Fedora Atomic](https://fedoraproject.org/atomic-desktops/) desktop image built on [Bazzite](https://bazzite.gg/), featuring Hyprland as the window manager, a curated set of CLI tools, and the full Bazzite gaming stack. Delivered as a bootable OCI container via [Universal Blue](https://universal-blue.org/).
+A custom [Fedora Atomic](https://fedoraproject.org/atomic-desktops/) desktop image built on [Fedora Silverblue](https://fedoraproject.org/atomic-desktops/silverblue/) via [Universal Blue](https://universal-blue.org/), featuring Hyprland as the window manager and a curated set of CLI tools. Delivered as a bootable OCI container.
 
 ## What's Inside
 
-### Base: Bazzite GNOME
+### Base: Fedora Silverblue (Universal Blue)
 
-Inherits the complete Bazzite gaming stack — Steam, Lutris, Gamescope, MangoHud, patched Mesa/PipeWire/Bluez, AMD drivers, ROCm, and a custom kernel.
+Vanilla GNOME desktop with Fedora Atomic foundations — immutable base OS, automatic updates via `bootc`, Flatpak for GUI apps, and Wayland by default.
 
 ### Hyprland Desktop
 
@@ -49,7 +49,7 @@ Firmador is available from wofi (`Super+Space`). The PKCS#11 module is registere
 
 ## Installation
 
-### Switch an existing Fedora Atomic / Bazzite system
+### Switch an existing Fedora Atomic system
 
 ```bash
 cosign verify --key cosign.pub ghcr.io/luisuma92/omyfendory:latest  # optional: verify signature
@@ -281,4 +281,4 @@ cosign verify --key cosign.pub ghcr.io/luisuma92/omyfendory:latest
 
 ## Credits
 
-Built on top of [Universal Blue](https://universal-blue.org/) and [Bazzite](https://bazzite.gg/). Started from the [ublue-os/image-template](https://github.com/ublue-os/image-template).
+Built on top of [Universal Blue](https://universal-blue.org/) and [Fedora Silverblue](https://fedoraproject.org/atomic-desktops/silverblue/). Started from the [ublue-os/image-template](https://github.com/ublue-os/image-template).

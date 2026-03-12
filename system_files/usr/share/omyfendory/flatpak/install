@@ -19,5 +19,5 @@ com.obsproject.Studio
 org.inkscape.Inkscape
 
 # Utilities
-# org.gnome.Calculator — already provided by Bazzite (fedora remote)
+# org.gnome.Calculator — already provided by silverblue-main (fedora remote)
 org.localsend.localsend_app

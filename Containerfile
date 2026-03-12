@@ -3,7 +3,7 @@ FROM scratch AS ctx
 COPY build_files /
 
 # Base Image
-FROM ghcr.io/ublue-os/bazzite-gnome:stable
+FROM ghcr.io/ublue-os/silverblue-main:stable
 
 ### MODIFICATIONS
 ## Install packages and configure services via build.sh
@@ -35,7 +35,8 @@ RUN dnf5 -y install pcsc-lite pcsc-lite-ccid patchelf webkit2gtk4.1 && \
 
 ## Make scripts executable and enable services that depend on copied files
 RUN chmod +x /usr/bin/omyfendory-* /usr/libexec/omyfendory-* && \
-    systemctl enable omyfendory-flatpak-manager.service
+    systemctl enable omyfendory-flatpak-manager.service && \
+    systemctl enable omyfendory-dotfiles-sync.service
 
 ### LINTING
 ## Verify final image and contents are correct.

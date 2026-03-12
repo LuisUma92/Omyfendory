@@ -3,7 +3,7 @@ set -ouex pipefail
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # Omyfendory build script
-# Layers Hyprland + tools on top of bazzite-gnome:stable
+# Layers Hyprland + tools on top of silverblue-main:stable
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 # ─── Enable COPRs ──────────────────────────────────────────────
@@ -57,8 +57,11 @@ dnf5 -y install \
 dnf5 -y install foot
 
 # ─── Fonts ─────────────────────────────────────────────────────
-# Nerd fonts (CaskaydiaMono, JetBrainsMono) already in bazzite base
-# via che/nerd-fonts COPR (nerd-fonts package)
+
+dnf5 -y copr enable che/nerd-fonts
+sed -i 's/repo_gpgcheck=1/repo_gpgcheck=0/' /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:che-nerd-fonts*.repo 2>/dev/null || true
+dnf5 -y install nerd-fonts
+dnf5 -y copr disable che/nerd-fonts
 
 dnf5 -y install fontawesome-fonts-all
 
@@ -77,6 +80,8 @@ rm -rf /tmp/ia-fonts.tar.gz /tmp/iA-Fonts-master
 dnf5 -y install \
     neovim \
     tmux \
+    btop \
+    distrobox \
     zoxide \
     fd-find \
     bat \

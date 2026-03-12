@@ -1,0 +1,55 @@
+#!/bin/bash
+# Omyfendory Dotfiles Sync
+# Copies /etc/skel configs to the autologin user's home directory.
+# Uses cp --no-clobber to preserve any user-modified files.
+# Runs as a oneshot systemd service before GDM starts.
+
+set -euo pipefail
+
+STAMP_DIR="/var/lib/omyfendory"
+STAMP_FILE="${STAMP_DIR}/dotfiles-sync.stamp"
+GDM_CONF="/etc/gdm/custom.conf"
+
+# ─── Determine target user from GDM autologin ────────────────
+USER_NAME=$(awk -F= '/^AutomaticLogin=/{print $2}' "$GDM_CONF" 2>/dev/null | head -1)
+
+if [[ -z "$USER_NAME" ]]; then
+    echo "No AutomaticLogin user found in ${GDM_CONF}, skipping."
+    exit 0
+fi
+
+USER_HOME=$(getent passwd "$USER_NAME" | cut -d: -f6)
+
+if [[ ! -d "$USER_HOME" ]]; then
+    echo "Home directory ${USER_HOME} does not exist, skipping."
+    exit 0
+fi
+
+# ─── Compute hash of skel contents ───────────────────────────
+CURRENT_HASH=$(find /etc/skel -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum | awk '{print $1}')
+
+if [[ -f "$STAMP_FILE" ]] && [[ "$(cat "$STAMP_FILE")" == "$CURRENT_HASH" ]]; then
+    echo "Skel configs unchanged (${CURRENT_HASH:0:12}…), nothing to do."
+    exit 0
+fi
+
+echo "Syncing /etc/skel configs to ${USER_HOME}..."
+
+# ─── Copy skel directories (no-clobber preserves user edits) ─
+for dir in /etc/skel/.config /etc/skel/.zen; do
+    if [[ -d "$dir" ]]; then
+        target="${USER_HOME}/$(basename "$dir")"
+        # cp -rn: recursive, no-clobber (skip existing files)
+        cp -rn "$dir" "$USER_HOME/"
+        echo "  Synced $(basename "$dir")"
+    fi
+done
+
+# ─── Fix ownership ───────────────────────────────────────────
+chown -R "${USER_NAME}:" "${USER_HOME}/.config" "${USER_HOME}/.zen" 2>/dev/null || true
+
+# ─── Write stamp ─────────────────────────────────────────────
+mkdir -p "$STAMP_DIR"
+echo "$CURRENT_HASH" > "$STAMP_FILE"
+
+echo "Dotfiles sync complete."

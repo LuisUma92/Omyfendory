@@ -1,0 +1,13 @@
+[Unit]
+Description=Omyfendory Dotfiles Sync — copy /etc/skel configs to user home
+After=local-fs.target
+Before=display-manager.service
+ConditionPathExists=/etc/skel/.config
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/omyfendory-dotfiles-sync
+TimeoutStartSec=60
+
+[Install]
+WantedBy=multi-user.target
