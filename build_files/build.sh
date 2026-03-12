@@ -98,6 +98,15 @@ tar xzf /tmp/eza.tar.gz -C /usr/bin
 chmod +x /usr/bin/eza
 rm -f /tmp/eza.tar.gz
 
+# ─── Firmador (PDF digital signer) ────────────────────────────
+# Costa Rican digital signature tool — requires Java 21
+
+dnf5 -y install java-21-openjdk
+
+mkdir -p /usr/share/firmador
+curl --retry 3 -Lo /usr/share/firmador/firmador.jar \
+    https://firmador.libre.cr/firmador.jar
+
 # ─── Disable COPRs ────────────────────────────────────────────
 # Prevent COPRs from persisting on the final image
 

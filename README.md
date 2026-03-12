@@ -39,12 +39,13 @@ An Arch Linux [distrobox](https://distrobox.it/) container (`arch-dev`) with com
 ### Firma Digital (Costa Rica)
 
 Pre-installed digital signature stack for Costa Rican government and banking services:
+- **Firmador** — PDF digital signing application ([firmador.libre.cr](https://firmador.libre.cr/))
 - **Idopte middleware** — PKCS#11 smart card driver (`libidop11.so`)
 - **Agente GAUDI** — authentication broker for BCCR/banking portals
 - **Legacy Athena libraries** — `libASEP11.so` for older government applets
 - **pcscd** — smart card reader daemon (auto-starts on card insertion)
 
-The PKCS#11 module is registered system-wide via p11-kit — browsers detect the smart card automatically.
+Firmador is available from wofi (`Super+Space`). The PKCS#11 module is registered system-wide via p11-kit — browsers detect the smart card automatically.
 
 ## Installation
 
@@ -98,17 +99,24 @@ distrobox enter arch-dev
 | Shortcut | Action |
 |---|---|
 | `Super+Q` | Close window |
+| `Ctrl+Alt+Delete` | Close all windows |
 | `Super+J` | Toggle split |
+| `Super+P` | Pseudo window |
 | `Super+Shift+V` | Toggle floating |
 | `Shift+F11` | Fullscreen |
+| `Alt+F11` | Full width |
 | `Super+Arrow` | Move focus |
 | `Super+Shift+Arrow` | Swap window |
 | `Super+1-0` | Switch workspace |
 | `Super+Shift+1-0` | Move window to workspace |
 | `Super+Tab / Shift+Tab` | Next / previous workspace |
+| `Super+Ctrl+Tab` | Former workspace |
 | `Alt+Tab` | Cycle windows |
-| `Super+- / +` | Resize width |
-| `Super+Mouse drag` | Move / resize window |
+| `Super+- / =` | Resize width |
+| `Super+Shift+- / =` | Resize height |
+| `Super+Mouse scroll` | Scroll workspaces |
+| `Super+Left-drag` | Move window |
+| `Super+Right-drag` | Resize window |
 
 ### Apps
 
@@ -117,17 +125,29 @@ distrobox enter arch-dev
 | `Super+Return` | Terminal (foot) |
 | `Super+Space` | App launcher (wofi) |
 | `Super+B` | Browser (Zen) |
+| `Super+Shift+B` | Browser private window |
 | `Super+F` | File manager (Nautilus) |
 | `Super+N` | Neovim |
+| `Super+T` | Activity monitor (btop) |
 | `Super+M` | Spotify |
 | `Super+O` | Obsidian |
 | `Super+E` | Edge |
 | `Super+I` | Inkscape |
 | `Super+Z` | Zotero |
 | `Super+D` | PDF viewer (zathura) |
+| `Super+/` | 1Password |
+| `Super+Shift+D` | Docker (lazydocker) |
+| `Super+Shift+P` | Python REPL |
 | `Super+A` | ChatGPT |
 | `Super+Y` | YouTube |
 | `Super+W` | WhatsApp |
+| `Super+Alt+G` | Google Messages |
+| `Super+C` | CorreoUCR |
+| `Super+Shift+C` | Gmail |
+| `Super+G` | Gitea |
+| `Super+Shift+G` | GitHub |
+| `Super+Ctrl+V` | Clipboard history |
+| `Super+Alt+C / V / X` | Universal copy / paste / cut |
 
 ### System
 
@@ -138,9 +158,17 @@ distrobox enter arch-dev
 | `Super+Ctrl+I` | Toggle idle lock |
 | `Super+Shift+Space` | Toggle waybar |
 | `Super+Comma` | Dismiss notification |
+| `Super+Shift+Comma` | Dismiss all notifications |
+| `Super+Alt+Comma` | Invoke notification |
+| `Super+Ctrl+Comma` | Toggle Do Not Disturb |
 | `Super+Backspace` | Toggle window transparency |
 | `Print` | Screenshot region |
 | `Super+Print` | Color picker |
+| `Super+Ctrl+Z` | Zoom in |
+| `Super+Ctrl+Alt+Z` | Reset zoom |
+| `Super+Ctrl+Alt+T` | Show time |
+| `Super+Ctrl+Alt+B` | Show battery |
+| `XF86Calculator` | Calculator |
 | `XF86PowerOff` | Power menu |
 | `Super+Escape` | Logout |
 
@@ -185,6 +213,10 @@ system_files/                       # Overlay copied to / in the image
     skel/.zen/Profiles/webapp/         # Zen Browser webapp profile
       chrome/userChrome.css            # Hides browser chrome for webapp mode
       user.js                          # Webapp-friendly defaults
+  opt/FirmaDigital/                    # Firma Digital installers (removed after build)
+    Agente GAUDI/*.rpm                 # BCCR authentication broker
+    Idopte/*.rpm                       # PKCS#11 middleware
+    Librería/*.so                      # Legacy Athena PKCS#11 libraries
   usr/
     bin/
       omyfendory-launch-browser      # Zen Browser launcher
@@ -200,8 +232,11 @@ system_files/                       # Overlay copied to / in the image
       omyfendory-flatpak-manager.service
     libexec/
       omyfendory-flatpak-manager     # First-boot Flatpak installer
-    share/omyfendory/flatpak/
-      install                        # Flatpak app list
+    share/
+      applications/
+        firmador.desktop             # Firmador PDF signer launcher
+      omyfendory/flatpak/
+        install                      # Flatpak app list
 .github/workflows/
   build.yml                          # CI: build, push to GHCR, sign with cosign
 Justfile                             # Local dev commands
@@ -231,7 +266,7 @@ Edit the `additional_packages` line in `system_files/etc/distrobox/arch-dev.ini`
 
 ## How It Works
 
-1. **Build time** (`Containerfile` + `build.sh`): installs RPM packages from Fedora repos and COPRs, downloads eza and iA Writer fonts from GitHub, configures GDM autologin, enables services, pre-configures Flathub remote.
+1. **Build time** (`Containerfile` + `build.sh`): installs RPM packages from Fedora repos and COPRs, downloads eza and iA Writer fonts from GitHub, installs Firma Digital middleware from bundled RPMs and Firmador from firmador.libre.cr, configures GDM autologin, enables services, pre-configures Flathub remote.
 2. **Image delivery**: CI builds the OCI image daily, pushes to GHCR, signs with [cosign](https://github.com/sigstore/cosign).
 3. **First boot**: `omyfendory-flatpak-manager.service` installs all Flatpak apps. A sha256 stamp file ensures it only re-runs when the app list changes. Webapp shortcuts open Zen Browser with a dedicated profile that hides all browser chrome.
 4. **Updates**: `bootc upgrade` pulls the latest image atomically. Rollback with `bootc rollback`.
