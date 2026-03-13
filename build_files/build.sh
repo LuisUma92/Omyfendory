@@ -58,12 +58,7 @@ dnf5 -y install foot
 
 # ─── Fonts ─────────────────────────────────────────────────────
 
-dnf5 -y copr enable che/nerd-fonts
-sed -i 's/repo_gpgcheck=1/repo_gpgcheck=0/' /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:che-nerd-fonts*.repo 2>/dev/null || true
-dnf5 -y install nerd-fonts
-dnf5 -y copr disable che/nerd-fonts
-
-dnf5 -y install fontawesome-fonts-all
+dnf5 -y install cascadia-mono-nf-fonts fontawesome-fonts-all
 
 # iA Writer fonts (not packaged for Fedora — install from GitHub)
 curl -sL -o /tmp/ia-fonts.tar.gz https://github.com/iaolo/iA-Fonts/archive/refs/heads/master.tar.gz
