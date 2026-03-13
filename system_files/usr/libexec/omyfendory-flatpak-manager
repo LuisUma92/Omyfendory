@@ -51,4 +51,7 @@ if [[ ${#FAILED[@]} -gt 0 ]]; then
     exit 1
 fi
 
+# Rebuild icon cache so GNOME app grid picks up Flatpak icons
+gtk-update-icon-cache -f -t /usr/share/icons/hicolor 2>/dev/null || true
+
 echo "All Flatpak apps installed successfully."

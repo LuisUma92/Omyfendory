@@ -1,7 +1,7 @@
 #!/bin/bash
 # Omyfendory Dotfiles Sync
 # Copies /etc/skel configs to the autologin user's home directory.
-# Uses cp --no-clobber to preserve any user-modified files.
+# Only runs when the skel contents change (new image version).
 # Runs as a oneshot systemd service before GDM starts.
 
 set -euo pipefail
@@ -35,12 +35,12 @@ fi
 
 echo "Syncing /etc/skel configs to ${USER_HOME}..."
 
-# ─── Copy skel directories (no-clobber preserves user edits) ─
+# ─── Copy skel directories ────────────────────────────────────
+# Overwrite with cp -r: this block only runs when skel hash changes
+# (new image), so user edits between updates are preserved.
 for dir in /etc/skel/.config /etc/skel/.zen; do
     if [[ -d "$dir" ]]; then
-        target="${USER_HOME}/$(basename "$dir")"
-        # cp -rn: recursive, no-clobber (skip existing files)
-        cp -rn "$dir" "$USER_HOME/"
+        cp -rf "$dir" "$USER_HOME/"
         echo "  Synced $(basename "$dir")"
     fi
 done

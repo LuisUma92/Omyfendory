@@ -93,7 +93,7 @@ Using `zen-browser --blank-window --no-remote` via `omyfendory-launch-webapp` sc
 **Webapp bindings** (in `bindings/apps.conf`): ChatGPT, YouTube, WhatsApp, Google Messages, CorreoUCR, Gmail, Gitea, GitHub.
 
 ### First-boot dotfiles sync (done — step 12)
-`/etc/skel` only populates home directories for **new** accounts. For existing users (e.g. after `bootc switch`), a systemd oneshot service (`omyfendory-dotfiles-sync.service`) runs before GDM. It reads the autologin user from `/etc/gdm/custom.conf`, computes a sha256 stamp of all skel files, and copies `.config/` and `.zen/` with `cp -rn` (no-clobber preserves user edits). Stamp file at `/var/lib/omyfendory/dotfiles-sync.stamp`.
+`/etc/skel` only populates home directories for **new** accounts. For existing users (e.g. after `bootc switch`), a systemd oneshot service (`omyfendory-dotfiles-sync.service`) runs before GDM. It reads the autologin user from `/etc/gdm/custom.conf`, computes a sha256 stamp of all skel files, and copies `.config/` and `.zen/` with `cp -rf` (only runs when skel hash changes, i.e. new image version). Stamp file at `/var/lib/omyfendory/dotfiles-sync.stamp`.
 
 **Files:**
 - `system_files/usr/libexec/omyfendory-dotfiles-sync` — sync script
