@@ -5,7 +5,7 @@ FROM ghcr.io/ublue-os/silverblue-main:latest
 
 ## Layer 1: Repository setup — COPRs, external repos, gpgcheck fix
 RUN --mount=type=cache,dst=/var/cache \
-    dnf5 -y install dnf5-plugins || true && \
+    dnf5 -y --skip-unavailable install dnf5-plugins || true && \
     dnf5 -y copr enable solopasha/hyprland && \
     dnf5 -y copr enable erikreider/swayosd && \
     dnf5 -y copr enable atim/lazygit && \
@@ -14,14 +14,14 @@ RUN --mount=type=cache,dst=/var/cache \
     dnf5 -y config-manager addrepo --from-repofile=https://mise.jdx.dev/rpm/mise.repo && \
     dnf5 -y config-manager addrepo --from-repofile=https://pkgs.tailscale.com/stable/fedora/tailscale.repo && \
     dnf5 -y config-manager addrepo --from-repofile=https://negativo17.org/repos/fedora-rar.repo && \
-    dnf5 -y install \
+    dnf5 -y --skip-unavailable install \
         https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
         https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm && \
     sed -i 's/repo_gpgcheck=1/repo_gpgcheck=0/' /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:*.repo
 
 ## Layer 2: Hyprland ecosystem
 RUN --mount=type=cache,dst=/var/cache \
-    dnf5 -y install \
+    dnf5 -y --skip-unavailable install \
         hyprland \
         hypridle \
         hyprlock \
@@ -47,7 +47,7 @@ RUN --mount=type=cache,dst=/var/cache \
 
 ## Layer 3: Terminal + fonts
 RUN --mount=type=cache,dst=/var/cache \
-    dnf5 -y install \
+    dnf5 -y --skip-unavailable install \
         foot \
         nerd-fonts \
         fontawesome-fonts-all \
@@ -61,7 +61,7 @@ RUN --mount=type=cache,dst=/var/cache \
 
 ## Layer 4: CLI tools + Firmador
 RUN --mount=type=cache,dst=/var/cache \
-    dnf5 -y install \
+    dnf5 -y --skip-unavailable install \
         neovim \
         tmux \
         zoxide \
@@ -86,7 +86,7 @@ RUN --mount=type=cache,dst=/var/cache \
 
 ## Layer 5: System packages — hardware, audio, archive, btrfs, network, utilities
 RUN --mount=type=cache,dst=/var/cache \
-    dnf5 -y install \
+    dnf5 -y --skip-unavailable install \
         ryzenadj \
         ddcutil \
         i2c-tools \
@@ -135,7 +135,7 @@ RUN --mount=type=cache,dst=/var/cache \
 
 ## Layer 6: Gaming — Steam, winetricks, mangohud
 RUN --mount=type=cache,dst=/var/cache \
-    dnf5 -y install \
+    dnf5 -y --skip-unavailable install \
         steam \
         mangohud && \
     curl --retry 3 -Lo /usr/bin/winetricks \
@@ -203,7 +203,7 @@ COPY system_files /
 
 ## Layer 10: Firma Digital (Costa Rican digital signature)
 RUN --mount=type=cache,dst=/var/cache \
-    dnf5 -y install pcsc-lite pcsc-lite-ccid patchelf webkit2gtk4.1 && \
+    dnf5 -y --skip-unavailable install pcsc-lite pcsc-lite-ccid patchelf webkit2gtk4.1 && \
     rpm -i --nodeps /opt/FirmaDigital/Idopte/*.rpm && \
     rpm -i --nodeps /opt/FirmaDigital/Agente\ GAUDI/*.rpm && \
     patchelf --replace-needed libwebkit2gtk-4.0.so.37 libwebkit2gtk-4.1.so.0 \
