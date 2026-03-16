@@ -43,7 +43,7 @@ RUN --mount=type=cache,dst=/var/cache \
         playerctl \
         pamixer \
         wofi \
-        grim || true
+        grim
 
 ## Layer 3: Terminal + fonts
 RUN --mount=type=cache,dst=/var/cache \
@@ -51,13 +51,18 @@ RUN --mount=type=cache,dst=/var/cache \
         foot \
         nerd-fonts \
         fontawesome-fonts-all \
-        ia-writer-duo-fonts \
-        ia-writer-mono-fonts \
-        ia-writer-quattro-fonts \
-        stix-two-fonts \
         twitter-twemoji-fonts \
         lato-fonts \
-        fira-code-fonts || true
+        fira-code-fonts && \
+    curl -sL -o /tmp/ia-fonts.tar.gz \
+        https://github.com/iaolo/iA-Fonts/archive/refs/heads/master.tar.gz && \
+    tar xzf /tmp/ia-fonts.tar.gz -C /tmp && \
+    mkdir -p /usr/share/fonts/iA-Writer && \
+    cp /tmp/iA-Fonts-master/iA\ Writer\ Mono/Static/iAWriterMonoS-*.ttf /usr/share/fonts/iA-Writer/ && \
+    cp /tmp/iA-Fonts-master/iA\ Writer\ Duo/Static/iAWriterDuoS-*.ttf /usr/share/fonts/iA-Writer/ && \
+    cp /tmp/iA-Fonts-master/iA\ Writer\ Quattro/Static/iAWriterQuattroS-*.ttf /usr/share/fonts/iA-Writer/ && \
+    fc-cache -f /usr/share/fonts/iA-Writer && \
+    rm -rf /tmp/ia-fonts.tar.gz /tmp/iA-Fonts-master
 
 ## Layer 4: CLI tools + Firmador
 RUN --mount=type=cache,dst=/var/cache \
@@ -78,7 +83,7 @@ RUN --mount=type=cache,dst=/var/cache \
         imv \
         zathura \
         zathura-pdf-mupdf \
-        java-21-openjdk || true && \
+        java-21-openjdk && \
     mkdir -p /usr/share/firmador && \
     curl --retry 3 -Lo /usr/share/firmador/firmador.jar \
         https://firmador.libre.cr/firmador.jar && \
@@ -127,7 +132,7 @@ RUN --mount=type=cache,dst=/var/cache \
         libxcrypt-compat \
         ydotool \
         yad \
-        v4l-utils || true && \
+        v4l-utils && \
     sed -i~ -E 's/=.\$\(command -v (nft|ip6?tables-legacy).*/=/g' \
         /usr/lib/waydroid/data/scripts/waydroid-net.sh && \
     sed -i 's/ --xdg-runtime=\\"${XDG_RUNTIME_DIR}\\"//g' \
@@ -137,7 +142,7 @@ RUN --mount=type=cache,dst=/var/cache \
 RUN --mount=type=cache,dst=/var/cache \
     dnf5 -y install \
         steam \
-        mangohud || true && \
+        mangohud && \
     curl --retry 3 -Lo /usr/bin/winetricks \
         https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks && \
     chmod +x /usr/bin/winetricks
@@ -203,7 +208,7 @@ COPY system_files /
 
 ## Layer 10: Firma Digital (Costa Rican digital signature)
 RUN --mount=type=cache,dst=/var/cache \
-    dnf5 -y install pcsc-lite pcsc-lite-ccid patchelf webkit2gtk4.1 || true && \
+    dnf5 -y install pcsc-lite pcsc-lite-ccid patchelf webkit2gtk4.1 && \
     rpm -i --nodeps /opt/FirmaDigital/Idopte/*.rpm && \
     rpm -i --nodeps /opt/FirmaDigital/Agente\ GAUDI/*.rpm && \
     patchelf --replace-needed libwebkit2gtk-4.0.so.37 libwebkit2gtk-4.1.so.0 \
