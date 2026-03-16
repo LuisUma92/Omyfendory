@@ -8,6 +8,7 @@ RUN --mount=type=cache,dst=/var/cache \
     dnf5 -y install dnf5-plugins || true && \
     dnf5 -y copr enable solopasha/hyprland && \
     dnf5 -y copr enable erikreider/swayosd && \
+    dnf5 -y copr enable atim/starship && \
     dnf5 -y copr enable atim/lazygit && \
     dnf5 -y copr enable atim/lazydocker && \
     dnf5 -y copr enable che/nerd-fonts && \
@@ -70,7 +71,6 @@ RUN --mount=type=cache,dst=/var/cache \
         neovim \
         tmux \
         zoxide \
-        eza \
         fd-find \
         bat \
         du-dust \
@@ -84,6 +84,11 @@ RUN --mount=type=cache,dst=/var/cache \
         zathura \
         zathura-pdf-mupdf \
         java-21-openjdk && \
+    EZA_VERSION=$(curl -s https://api.github.com/repos/eza-community/eza/releases/latest | grep -Po '"tag_name": "v\K[^"]*') && \
+    curl -sL -o /tmp/eza.tar.gz "https://github.com/eza-community/eza/releases/download/v${EZA_VERSION}/eza_x86_64-unknown-linux-gnu.tar.gz" && \
+    tar xzf /tmp/eza.tar.gz -C /usr/bin && \
+    chmod +x /usr/bin/eza && \
+    rm -f /tmp/eza.tar.gz && \
     mkdir -p /usr/share/firmador && \
     curl --retry 3 -Lo /usr/share/firmador/firmador.jar \
         https://firmador.libre.cr/firmador.jar && \
@@ -133,10 +138,14 @@ RUN --mount=type=cache,dst=/var/cache \
         ydotool \
         yad \
         v4l-utils && \
-    sed -i~ -E 's/=.\$\(command -v (nft|ip6?tables-legacy).*/=/g' \
-        /usr/lib/waydroid/data/scripts/waydroid-net.sh && \
-    sed -i 's/ --xdg-runtime=\\"${XDG_RUNTIME_DIR}\\"//g' \
-        /usr/bin/btrfs-assistant-launcher
+    if [ -f /usr/lib/waydroid/data/scripts/waydroid-net.sh ]; then \
+        sed -i~ -E 's/=.\$\(command -v (nft|ip6?tables-legacy).*/=/g' \
+            /usr/lib/waydroid/data/scripts/waydroid-net.sh; \
+    fi && \
+    if [ -f /usr/bin/btrfs-assistant-launcher ]; then \
+        sed -i 's/ --xdg-runtime=\\"${XDG_RUNTIME_DIR}\\"//g' \
+            /usr/bin/btrfs-assistant-launcher; \
+    fi
 
 ## Layer 6: Gaming — Steam, winetricks, mangohud
 RUN --mount=type=cache,dst=/var/cache \
@@ -169,6 +178,7 @@ RUN dnf5 -y remove \
 ## Layer 8: Disable repositories
 RUN dnf5 -y copr disable solopasha/hyprland && \
     dnf5 -y copr disable erikreider/swayosd && \
+    dnf5 -y copr disable atim/starship && \
     dnf5 -y copr disable atim/lazygit && \
     dnf5 -y copr disable atim/lazydocker && \
     dnf5 -y copr disable che/nerd-fonts && \
