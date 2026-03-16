@@ -56,7 +56,6 @@ RUN --mount=type=cache,dst=/var/cache \
         ia-writer-quattro-fonts \
         stix-two-fonts \
         twitter-twemoji-fonts \
-        google-noto-sans-cjk-fonts \
         lato-fonts \
         fira-code-fonts
 
