@@ -1,24 +1,210 @@
-# Allow build scripts to be referenced without being copied into the final image
-FROM scratch AS ctx
-COPY build_files /
-
 # Base Image
 FROM ghcr.io/ublue-os/silverblue-main:latest
 
 ### MODIFICATIONS
-## Install packages and configure services via build.sh
 
-RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
-    --mount=type=cache,dst=/var/cache \
-    --mount=type=cache,dst=/var/log \
-    --mount=type=tmpfs,dst=/tmp \
-    /ctx/build.sh
+## Layer 1: Repository setup — COPRs, external repos, gpgcheck fix
+RUN --mount=type=cache,dst=/var/cache \
+    dnf5 -y install dnf5-plugins || true && \
+    dnf5 -y copr enable solopasha/hyprland && \
+    dnf5 -y copr enable erikreider/swayosd && \
+    dnf5 -y copr enable atim/lazygit && \
+    dnf5 -y copr enable atim/lazydocker && \
+    dnf5 -y copr enable che/nerd-fonts && \
+    dnf5 -y config-manager addrepo --from-repofile=https://mise.jdx.dev/rpm/mise.repo && \
+    dnf5 -y config-manager addrepo --from-repofile=https://pkgs.tailscale.com/stable/fedora/tailscale.repo && \
+    dnf5 -y config-manager addrepo --from-repofile=https://negativo17.org/repos/fedora-rar.repo && \
+    dnf5 -y install \
+        https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
+        https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm && \
+    sed -i 's/repo_gpgcheck=1/repo_gpgcheck=0/' /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:*.repo
 
-## Copy system overlay (skel configs, helper scripts)
+## Layer 2: Hyprland ecosystem
+RUN --mount=type=cache,dst=/var/cache \
+    dnf5 -y install \
+        hyprland \
+        hypridle \
+        hyprlock \
+        hyprpicker \
+        hyprsunset \
+        hyprland-qtutils \
+        hyprpolkitagent \
+        xdg-desktop-portal-hyprland \
+        uwsm \
+        waybar \
+        mako \
+        swaybg \
+        swayosd \
+        slurp \
+        satty \
+        wl-clipboard \
+        cliphist \
+        brightnessctl \
+        playerctl \
+        pamixer \
+        wofi \
+        grim
+
+## Layer 3: Terminal + fonts
+RUN --mount=type=cache,dst=/var/cache \
+    dnf5 -y install \
+        foot \
+        nerd-fonts \
+        fontawesome-fonts-all \
+        ia-writer-duo-fonts \
+        ia-writer-mono-fonts \
+        ia-writer-quattro-fonts \
+        stix-two-fonts \
+        twitter-twemoji-fonts \
+        google-noto-sans-cjk-fonts \
+        lato-fonts \
+        fira-code-fonts
+
+## Layer 4: CLI tools + Firmador
+RUN --mount=type=cache,dst=/var/cache \
+    dnf5 -y install \
+        neovim \
+        tmux \
+        zoxide \
+        eza \
+        fd-find \
+        bat \
+        du-dust \
+        fzf \
+        ripgrep \
+        starship \
+        lazygit \
+        lazydocker \
+        mise \
+        imv \
+        zathura \
+        zathura-pdf-mupdf \
+        java-21-openjdk && \
+    mkdir -p /usr/share/firmador && \
+    curl --retry 3 -Lo /usr/share/firmador/firmador.jar \
+        https://firmador.libre.cr/firmador.jar && \
+    echo "cc49f852cdf6a37a35ae25ddc3db90311495b538ff83d334312a00e507de7ef4  /usr/share/firmador/firmador.jar" | sha256sum -c -
+
+## Layer 5: System packages — hardware, audio, archive, btrfs, network, utilities
+RUN --mount=type=cache,dst=/var/cache \
+    dnf5 -y install \
+        ryzenadj \
+        ddcutil \
+        i2c-tools \
+        lm_sensors \
+        iio-sensor-proxy \
+        input-remapper \
+        libinput-utils \
+        pulseaudio-utils \
+        libfreeaptx \
+        ladspa-caps-plugins \
+        ladspa-noise-suppression-for-voice \
+        pipewire-module-filter-chain-sofa \
+        p7zip \
+        p7zip-plugins \
+        rar \
+        lzip \
+        libaacs \
+        libbdplus \
+        libbluray \
+        libbluray-utils \
+        snapper \
+        btrfs-assistant \
+        compsize \
+        waydroid \
+        cage \
+        wlr-randr \
+        tailscale \
+        btop \
+        fastfetch \
+        glow \
+        gum \
+        duf \
+        lshw \
+        topgrade \
+        greenboot \
+        greenboot-default-health-checks \
+        udica \
+        libxcrypt-compat \
+        ydotool \
+        yad \
+        v4l-utils && \
+    sed -i~ -E 's/=.\$\(command -v (nft|ip6?tables-legacy).*/=/g' \
+        /usr/lib/waydroid/data/scripts/waydroid-net.sh && \
+    sed -i 's/ --xdg-runtime=\\"${XDG_RUNTIME_DIR}\\"//g' \
+        /usr/bin/btrfs-assistant-launcher
+
+## Layer 6: Gaming — Steam, winetricks, mangohud
+RUN --mount=type=cache,dst=/var/cache \
+    dnf5 -y install \
+        steam \
+        mangohud && \
+    curl --retry 3 -Lo /usr/bin/winetricks \
+        https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks && \
+    chmod +x /usr/bin/winetricks
+
+## Layer 7: Remove unneeded packages + mask unused services
+RUN dnf5 -y remove \
+        firefox \
+        firefox-langpacks \
+        toolbox \
+        gnome-software \
+        gnome-classic-session \
+        gnome-tour \
+        gnome-extensions-app \
+        gnome-system-monitor \
+        gnome-initial-setup \
+        gnome-shell-extension-background-logo \
+        gnome-shell-extension-apps-menu \
+        gnome-shell-extension-launch-new-instance \
+        gnome-shell-extension-places-menu \
+        gnome-shell-extension-window-list && \
+    systemctl mask iscsi && \
+    systemctl mask wpa_supplicant.service
+
+## Layer 8: Disable repositories
+RUN dnf5 -y copr disable solopasha/hyprland && \
+    dnf5 -y copr disable erikreider/swayosd && \
+    dnf5 -y copr disable atim/lazygit && \
+    dnf5 -y copr disable atim/lazydocker && \
+    dnf5 -y copr disable che/nerd-fonts && \
+    dnf5 -y config-manager setopt mise.enabled=0 && \
+    dnf5 -y config-manager setopt tailscale.enabled=0 && \
+    dnf5 -y config-manager setopt fedora-rar.enabled=0 && \
+    dnf5 -y config-manager setopt rpmfusion-free.enabled=0 && \
+    dnf5 -y config-manager setopt rpmfusion-free-updates.enabled=0 && \
+    dnf5 -y config-manager setopt rpmfusion-nonfree.enabled=0 && \
+    dnf5 -y config-manager setopt rpmfusion-nonfree-updates.enabled=0
+
+## Layer 9: Flathub remote + GDM autologin
+RUN <<'LAYER9'
+set -eux
+mkdir -p /etc/flatpak/remotes.d
+curl --retry 3 -Lo /etc/flatpak/remotes.d/flathub.flatpakrepo \
+    https://dl.flathub.org/repo/flathub.flatpakrepo
+mkdir -p /etc/gdm
+cat > /etc/gdm/custom.conf << 'GDMCONF'
+[daemon]
+AutomaticLoginEnable=True
+AutomaticLogin=luis
+DefaultSession=hyprland-uwsm.desktop
+
+[security]
+
+[xdmcp]
+
+[chooser]
+
+[debug]
+GDMCONF
+LAYER9
+
+## Copy system overlay (skel configs, helper scripts, Firma Digital RPMs)
 COPY system_files /
 
-## Install Firma Digital (Costa Rican digital signature)
-RUN dnf5 -y install pcsc-lite pcsc-lite-ccid patchelf webkit2gtk4.1 && \
+## Layer 10: Firma Digital (Costa Rican digital signature)
+RUN --mount=type=cache,dst=/var/cache \
+    dnf5 -y install pcsc-lite pcsc-lite-ccid patchelf webkit2gtk4.1 && \
     rpm -i --nodeps /opt/FirmaDigital/Idopte/*.rpm && \
     rpm -i --nodeps /opt/FirmaDigital/Agente\ GAUDI/*.rpm && \
     patchelf --replace-needed libwebkit2gtk-4.0.so.37 libwebkit2gtk-4.1.so.0 \
@@ -30,13 +216,15 @@ RUN dnf5 -y install pcsc-lite pcsc-lite-ccid patchelf webkit2gtk4.1 && \
     ln -sf /usr/lib64/libASEP11.so /usr/lib/libASEP11.so && \
     mkdir -p /usr/share/p11-kit/modules && \
     echo "module: /usr/lib/SCMiddleware/libidop11.so" > /usr/share/p11-kit/modules/firma-digital.module && \
-    systemctl enable pcscd.socket && \
     rm -rf /opt/FirmaDigital
 
-## Make scripts executable and enable services that depend on copied files
+## Layer 11: Finalize — make scripts executable, enable all services
 RUN chmod +x /usr/bin/omyfendory-* /usr/libexec/omyfendory-* && \
+    systemctl enable pcscd.socket && \
+    systemctl enable podman.socket && \
     systemctl enable omyfendory-flatpak-manager.service && \
-    systemctl enable omyfendory-dotfiles-sync.service
+    systemctl enable omyfendory-dotfiles-sync.service && \
+    systemctl enable setup-distrobox.service
 
 ### LINTING
 ## Verify final image and contents are correct.

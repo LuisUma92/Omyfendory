@@ -4,7 +4,6 @@
 # Browsers
 app.zen_browser.zen
 com.microsoft.Edge
-com.brave.Browser
 
 # Productivity
 md.obsidian.Obsidian

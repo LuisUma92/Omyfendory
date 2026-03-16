@@ -25,8 +25,12 @@ if [[ ! -d "$USER_HOME" ]]; then
     exit 0
 fi
 
-# ─── Compute hash of skel contents ───────────────────────────
-CURRENT_HASH=$(find /etc/skel -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum | awk '{print $1}')
+# ─── Compute hash of skel contents + zen extensions ──────────
+HASH_INPUT=$(
+    find /etc/skel -type f -print0 | sort -z | xargs -0 sha256sum
+    find /usr/share/omyfendory/zen-extensions -type f -print0 2>/dev/null | sort -z | xargs -0 sha256sum 2>/dev/null
+)
+CURRENT_HASH=$(echo "$HASH_INPUT" | sha256sum | awk '{print $1}')
 
 if [[ -f "$STAMP_FILE" ]] && [[ "$(cat "$STAMP_FILE")" == "$CURRENT_HASH" ]]; then
     echo "Skel configs unchanged (${CURRENT_HASH:0:12}…), nothing to do."
@@ -38,15 +42,49 @@ echo "Syncing /etc/skel configs to ${USER_HOME}..."
 # ─── Copy skel directories ────────────────────────────────────
 # Overwrite with cp -r: this block only runs when skel hash changes
 # (new image), so user edits between updates are preserved.
-for dir in /etc/skel/.config /etc/skel/.zen; do
+for dir in /etc/skel/.config /etc/skel/.zen /etc/skel/.local; do
     if [[ -d "$dir" ]]; then
         cp -rf "$dir" "$USER_HOME/"
         echo "  Synced $(basename "$dir")"
     fi
 done
 
+# ─── Copy .bashrc ─────────────────────────────────────────────
+if [[ -f /etc/skel/.bashrc ]]; then
+    cp -f /etc/skel/.bashrc "$USER_HOME/.bashrc"
+    echo "  Synced .bashrc"
+fi
+
+# ─── Sync Zen extensions ─────────────────────────────────────
+ZEN_EXT_SRC="/usr/share/omyfendory/zen-extensions"
+if [[ -d "$ZEN_EXT_SRC" ]] && ls "$ZEN_EXT_SRC"/*.xpi &>/dev/null; then
+    # Find the user's default Zen profile directory
+    ZEN_DIR="${USER_HOME}/.zen"
+    ZEN_PROFILE=""
+    if [[ -f "${ZEN_DIR}/profiles.ini" ]]; then
+        ZEN_PROFILE=$(awk -F= '/^\[/{section=$0} /^Default=1/{found=section} /^Path=/{if(found==section) print $2}' "${ZEN_DIR}/profiles.ini" | head -1)
+    fi
+    # Fallback: glob for *.Default* profile
+    if [[ -z "$ZEN_PROFILE" ]]; then
+        for d in "${ZEN_DIR}"/*.Default*; do
+            if [[ -d "$d" ]]; then
+                ZEN_PROFILE=$(basename "$d")
+                break
+            fi
+        done
+    fi
+    if [[ -n "$ZEN_PROFILE" ]]; then
+        ZEN_EXT_DST="${ZEN_DIR}/${ZEN_PROFILE}/extensions"
+        mkdir -p "$ZEN_EXT_DST"
+        cp -f "$ZEN_EXT_SRC"/*.xpi "$ZEN_EXT_DST/"
+        echo "  Synced Zen extensions to ${ZEN_PROFILE}"
+    else
+        echo "  Warning: no Zen profile found, skipping extensions"
+    fi
+fi
+
 # ─── Fix ownership ───────────────────────────────────────────
-chown -R "${USER_NAME}:" "${USER_HOME}/.config" "${USER_HOME}/.zen" 2>/dev/null || true
+chown -R "${USER_NAME}:" "${USER_HOME}/.config" "${USER_HOME}/.zen" "${USER_HOME}/.local" "${USER_HOME}/.bashrc" 2>/dev/null || true
 
 # ─── Write stamp ─────────────────────────────────────────────
 mkdir -p "$STAMP_DIR"

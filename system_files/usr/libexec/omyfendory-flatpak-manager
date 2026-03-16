@@ -51,7 +51,11 @@ if [[ ${#FAILED[@]} -gt 0 ]]; then
     exit 1
 fi
 
-# Rebuild icon cache so GNOME app grid picks up Flatpak icons
+# Rebuild icon caches so app launchers (wofi, GNOME) pick up Flatpak icons
 gtk-update-icon-cache -f -t /usr/share/icons/hicolor 2>/dev/null || true
+gtk-update-icon-cache -f -t /var/lib/flatpak/exports/share/icons/hicolor 2>/dev/null || true
+
+# Update desktop database so wofi and other launchers discover Flatpak .desktop files
+update-desktop-database /var/lib/flatpak/exports/share/applications 2>/dev/null || true
 
 echo "All Flatpak apps installed successfully."
