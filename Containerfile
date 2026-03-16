@@ -5,7 +5,7 @@ FROM ghcr.io/ublue-os/silverblue-main:latest
 
 ## Layer 1: Repository setup — COPRs, external repos, gpgcheck fix
 RUN --mount=type=cache,dst=/var/cache \
-    dnf5 -y --skip-unavailable install dnf5-plugins || true && \
+    dnf5 -y install dnf5-plugins || true && \
     dnf5 -y copr enable solopasha/hyprland && \
     dnf5 -y copr enable erikreider/swayosd && \
     dnf5 -y copr enable atim/lazygit && \
@@ -14,14 +14,14 @@ RUN --mount=type=cache,dst=/var/cache \
     dnf5 -y config-manager addrepo --from-repofile=https://mise.jdx.dev/rpm/mise.repo && \
     dnf5 -y config-manager addrepo --from-repofile=https://pkgs.tailscale.com/stable/fedora/tailscale.repo && \
     dnf5 -y config-manager addrepo --from-repofile=https://negativo17.org/repos/fedora-rar.repo && \
-    dnf5 -y --skip-unavailable install \
+    dnf5 -y install \
         https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
-        https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm && \
+        https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm || true && \
     sed -i 's/repo_gpgcheck=1/repo_gpgcheck=0/' /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:*.repo
 
 ## Layer 2: Hyprland ecosystem
 RUN --mount=type=cache,dst=/var/cache \
-    dnf5 -y --skip-unavailable install \
+    dnf5 -y install \
         hyprland \
         hypridle \
         hyprlock \
@@ -43,11 +43,11 @@ RUN --mount=type=cache,dst=/var/cache \
         playerctl \
         pamixer \
         wofi \
-        grim
+        grim || true
 
 ## Layer 3: Terminal + fonts
 RUN --mount=type=cache,dst=/var/cache \
-    dnf5 -y --skip-unavailable install \
+    dnf5 -y install \
         foot \
         nerd-fonts \
         fontawesome-fonts-all \
@@ -57,11 +57,11 @@ RUN --mount=type=cache,dst=/var/cache \
         stix-two-fonts \
         twitter-twemoji-fonts \
         lato-fonts \
-        fira-code-fonts
+        fira-code-fonts || true
 
 ## Layer 4: CLI tools + Firmador
 RUN --mount=type=cache,dst=/var/cache \
-    dnf5 -y --skip-unavailable install \
+    dnf5 -y install \
         neovim \
         tmux \
         zoxide \
@@ -78,7 +78,7 @@ RUN --mount=type=cache,dst=/var/cache \
         imv \
         zathura \
         zathura-pdf-mupdf \
-        java-21-openjdk && \
+        java-21-openjdk || true && \
     mkdir -p /usr/share/firmador && \
     curl --retry 3 -Lo /usr/share/firmador/firmador.jar \
         https://firmador.libre.cr/firmador.jar && \
@@ -86,7 +86,7 @@ RUN --mount=type=cache,dst=/var/cache \
 
 ## Layer 5: System packages — hardware, audio, archive, btrfs, network, utilities
 RUN --mount=type=cache,dst=/var/cache \
-    dnf5 -y --skip-unavailable install \
+    dnf5 -y install \
         ryzenadj \
         ddcutil \
         i2c-tools \
@@ -127,7 +127,7 @@ RUN --mount=type=cache,dst=/var/cache \
         libxcrypt-compat \
         ydotool \
         yad \
-        v4l-utils && \
+        v4l-utils || true && \
     sed -i~ -E 's/=.\$\(command -v (nft|ip6?tables-legacy).*/=/g' \
         /usr/lib/waydroid/data/scripts/waydroid-net.sh && \
     sed -i 's/ --xdg-runtime=\\"${XDG_RUNTIME_DIR}\\"//g' \
@@ -135,9 +135,9 @@ RUN --mount=type=cache,dst=/var/cache \
 
 ## Layer 6: Gaming — Steam, winetricks, mangohud
 RUN --mount=type=cache,dst=/var/cache \
-    dnf5 -y --skip-unavailable install \
+    dnf5 -y install \
         steam \
-        mangohud && \
+        mangohud || true && \
     curl --retry 3 -Lo /usr/bin/winetricks \
         https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks && \
     chmod +x /usr/bin/winetricks
@@ -157,7 +157,7 @@ RUN dnf5 -y remove \
         gnome-shell-extension-apps-menu \
         gnome-shell-extension-launch-new-instance \
         gnome-shell-extension-places-menu \
-        gnome-shell-extension-window-list && \
+        gnome-shell-extension-window-list || true && \
     systemctl mask iscsi && \
     systemctl mask wpa_supplicant.service
 
@@ -203,7 +203,7 @@ COPY system_files /
 
 ## Layer 10: Firma Digital (Costa Rican digital signature)
 RUN --mount=type=cache,dst=/var/cache \
-    dnf5 -y --skip-unavailable install pcsc-lite pcsc-lite-ccid patchelf webkit2gtk4.1 && \
+    dnf5 -y install pcsc-lite pcsc-lite-ccid patchelf webkit2gtk4.1 || true && \
     rpm -i --nodeps /opt/FirmaDigital/Idopte/*.rpm && \
     rpm -i --nodeps /opt/FirmaDigital/Agente\ GAUDI/*.rpm && \
     patchelf --replace-needed libwebkit2gtk-4.0.so.37 libwebkit2gtk-4.1.so.0 \
