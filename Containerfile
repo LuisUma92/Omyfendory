@@ -96,8 +96,7 @@ RUN --mount=type=cache,dst=/var/cache \
 
 ## Layer 5: System packages — hardware, audio, archive, btrfs, network, utilities
 RUN --mount=type=cache,dst=/var/cache \
-    dnf5 -y install \
-        ryzenadj \
+    dnf5 -y --allowerasing install \
         ddcutil \
         i2c-tools \
         lm_sensors \
@@ -107,7 +106,6 @@ RUN --mount=type=cache,dst=/var/cache \
         pulseaudio-utils \
         libfreeaptx \
         ladspa-caps-plugins \
-        ladspa-noise-suppression-for-voice \
         pipewire-module-filter-chain-sofa \
         p7zip \
         p7zip-plugins \
@@ -130,7 +128,6 @@ RUN --mount=type=cache,dst=/var/cache \
         gum \
         duf \
         lshw \
-        topgrade \
         greenboot \
         greenboot-default-health-checks \
         udica \
