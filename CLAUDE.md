@@ -30,7 +30,7 @@ Build a custom Fedora Atomic (Universal Blue) image that reproduces the current 
 5. **System packages** — hardware (ryzenadj, ddcutil, lm_sensors), audio (ladspa, libfreeaptx), archive (p7zip, rar), btrfs (snapper, btrfs-assistant), waydroid, tailscale, btop, fastfetch, greenboot, etc.
 6. **Gaming** — steam, mangohud, winetricks
 7. **Remove packages** — firefox, toolbox, gnome-software, GNOME extensions; mask iscsi, wpa_supplicant
-8. **Repo cleanup** — disable all COPRs and external repos
+8. **Repo cleanup** — disable all COPRs and external repo
 9. **Flathub + GDM** — flatpak remote, GDM autologin config
 10. **COPY system_files /** — overlay (skel, scripts, services, Firma Digital RPMs)
 11. **Firma Digital** — pcsc-lite, patchelf, RPM install, p11-kit module (needs COPY'd files)
