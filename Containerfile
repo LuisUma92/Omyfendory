@@ -173,19 +173,16 @@ RUN dnf5 -y remove \
     systemctl mask wpa_supplicant.service
 
 ## Layer 8: Disable repositories
-RUN dnf5 -y copr disable solopasha/hyprland && \
-    dnf5 -y copr disable erikreider/swayosd && \
-    dnf5 -y copr disable atim/starship && \
-    dnf5 -y copr disable atim/lazygit && \
-    dnf5 -y copr disable atim/lazydocker && \
-    dnf5 -y copr disable che/nerd-fonts && \
-    dnf5 -y config-manager setopt mise.enabled=0 && \
-    dnf5 -y config-manager setopt tailscale.enabled=0 && \
-    dnf5 -y config-manager setopt fedora-rar.enabled=0 && \
-    dnf5 -y config-manager setopt rpmfusion-free.enabled=0 && \
-    dnf5 -y config-manager setopt rpmfusion-free-updates.enabled=0 && \
-    dnf5 -y config-manager setopt rpmfusion-nonfree.enabled=0 && \
-    dnf5 -y config-manager setopt rpmfusion-nonfree-updates.enabled=0
+RUN dnf5 -y copr disable solopasha/hyprland || true && \
+    dnf5 -y copr disable erikreider/swayosd || true && \
+    dnf5 -y copr disable atim/starship || true && \
+    dnf5 -y copr disable atim/lazygit || true && \
+    dnf5 -y copr disable atim/lazydocker || true && \
+    dnf5 -y copr disable che/nerd-fonts || true && \
+    rm -f /etc/yum.repos.d/mise*.repo && \
+    rm -f /etc/yum.repos.d/tailscale*.repo && \
+    rm -f /etc/yum.repos.d/fedora-rar*.repo && \
+    rm -f /etc/yum.repos.d/rpmfusion-*.repo
 
 ## Layer 9: Flathub remote + GDM autologin
 RUN <<'LAYER9'
