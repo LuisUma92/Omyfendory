@@ -185,27 +185,11 @@ RUN dnf5 -y copr disable solopasha/hyprland || true && \
     rm -f /etc/yum.repos.d/rpmfusion-*.repo
 
 ## Layer 9: Flathub remote + GDM autologin
-RUN <<'LAYER9'
-set -eux
-mkdir -p /etc/flatpak/remotes.d
-curl --retry 3 -Lo /etc/flatpak/remotes.d/flathub.flatpakrepo \
-    https://dl.flathub.org/repo/flathub.flatpakrepo
-mkdir -p /etc/gdm
-cat > /etc/gdm/custom.conf << 'GDMCONF'
-[daemon]
-AutomaticLoginEnable=True
-AutomaticLogin=luis
-DefaultSession=hyprland-uwsm.desktop
-
-[security]
-
-[xdmcp]
-
-[chooser]
-
-[debug]
-GDMCONF
-LAYER9
+RUN mkdir -p /etc/flatpak/remotes.d && \
+    curl --retry 3 -Lo /etc/flatpak/remotes.d/flathub.flatpakrepo \
+        https://dl.flathub.org/repo/flathub.flatpakrepo && \
+    mkdir -p /etc/gdm && \
+    printf '[daemon]\nAutomaticLoginEnable=True\nAutomaticLogin=luis\nDefaultSession=hyprland-uwsm.desktop\n\n[security]\n\n[xdmcp]\n\n[chooser]\n\n[debug]\n' > /etc/gdm/custom.conf
 
 ## Copy system overlay (skel configs, helper scripts, Firma Digital RPMs)
 COPY system_files /
