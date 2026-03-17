@@ -215,8 +215,7 @@ RUN chmod +x /usr/bin/omyfendory-* /usr/libexec/omyfendory-* && \
     systemctl enable pcscd.socket && \
     systemctl enable podman.socket && \
     systemctl enable omyfendory-flatpak-manager.service && \
-    systemctl enable omyfendory-dotfiles-sync.service && \
-    systemctl enable setup-distrobox.service
+    systemctl enable omyfendory-dotfiles-sync.service
 
 ### LINTING
 ## Verify final image and contents are correct.
