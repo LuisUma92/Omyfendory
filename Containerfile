@@ -96,7 +96,7 @@ RUN --mount=type=cache,dst=/var/cache \
 
 ## Layer 5: System packages — hardware, audio, archive, btrfs, network, utilities
 RUN --mount=type=cache,dst=/var/cache \
-    dnf5 -y --allowerasing install \
+    dnf5 -y install --allowerasing \
         ddcutil \
         i2c-tools \
         lm_sensors \
